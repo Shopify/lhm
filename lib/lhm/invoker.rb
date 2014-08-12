@@ -6,6 +6,7 @@ require 'lhm/entangler'
 require 'lhm/atomic_switcher'
 require 'lhm/locked_switcher'
 require 'lhm/migrator'
+require 'lhm/verifier'
 
 module Lhm
   # Copies an origin table to an altered destination table. Live activity is
@@ -41,6 +42,8 @@ module Lhm
     end
 
     def run(options = {})
+      options[:verify] ||= false
+
       Lhm.logger.info "Starting LHM run on table=#{@migrator.name}"
 
       if !options.include?(:atomic_switch)
@@ -55,14 +58,19 @@ module Lhm
 
       set_session_lock_wait_timeouts
 
-      migration = @migrator.run
+      if options[:verify]
+        verifier = Verifier.new(@migrator, @connection)
+        verifier.risk
+      else
+        migration = @migrator.run
 
-      Entangler.new(migration, @connection).run do
-        Chunker.new(migration, @connection, options).run
-        if options[:atomic_switch]
-          AtomicSwitcher.new(migration, @connection).run
-        else
-          LockedSwitcher.new(migration, @connection).run
+        Entangler.new(migration, @connection).run do
+          Chunker.new(migration, @connection, options).run
+          if options[:atomic_switch]
+            AtomicSwitcher.new(migration, @connection).run
+          else
+            LockedSwitcher.new(migration, @connection).run
+          end
         end
       end
 
