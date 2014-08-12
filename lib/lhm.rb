@@ -42,6 +42,7 @@ module Lhm
   # @return [Boolean] Returns true if the migration finishes
   # @raise [Error] Raises Lhm::Error in case of a error and aborts the migration
   def self.change_table(table_name, options = {}, &block)
+    options[:verify] ||= !ENV['VERIFY'].nil?
     origin = Table.parse(table_name, connection)
     invoker = Invoker.new(origin, connection, options)
     block.call(invoker.migrator)

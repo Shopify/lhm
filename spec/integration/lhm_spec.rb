@@ -237,6 +237,17 @@ describe Lhm do
       end
     end
 
+    describe 'verification' do
+      it 'should not change anything' do
+        Lhm.change_table(:users, :atomic_switch => false, :verify => true) do |t|
+          t.ddl("alter table %s add column flag tinyint(1)" % t.name)
+        end
+
+        slave do
+          table_read(:users).columns["flag"].must_equal(nil)
+        end
+      end
+    end
 
     describe "parallel" do
       it "should perserve inserts during migration" do

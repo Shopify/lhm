@@ -13,7 +13,7 @@ module Lhm
     include Command
     include SqlHelper
 
-    attr_reader :name, :statements, :connection, :conditions
+    attr_reader :name, :origin, :statements, :connection, :conditions
 
     def initialize(table, connection = nil, options = nil)
       @connection = connection
