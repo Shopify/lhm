@@ -53,6 +53,13 @@ module Lhm
         end
       end
 
+      if options[:throttler]
+        throttler_options = options[:throttler_options] || {}
+        options[:throttler] = Throttler::Factory.create_throttler(options[:throttler], throttler_options)
+      else
+        options[:throttler] = Lhm.throttler
+      end
+
       set_session_lock_wait_timeouts
 
       migration = @migrator.run

@@ -11,35 +11,43 @@ module Lhm
 
     attr_reader :connection
 
-    # Copy from origin to destination in chunks of size `stride`. Sleeps for
-    # `throttle` milliseconds between each stride.
+    # Copy from origin to destination in chunks of size `stride`.
+    # Use the `throttler` class to sleep between each stride.
     def initialize(migration, connection = nil, options = {})
       @migration = migration
       @connection = connection
-      @stride = options[:stride] || 40_000
+      if @throttler = options[:throttler]
+        @throttler.connection = @connection if @throttler.respond_to?(:connection=)
+      end
       @throttle = options[:throttle] || 100
       @start = options[:start] || select_start
       @limit = options[:limit] || select_limit
       @printer = options[:printer] || Printer::Percentage.new
     end
 
-    # Copies chunks of size `stride`, starting from `start` up to id `limit`.
-    def up_to(&block)
-      1.upto(traversable_chunks_size) do |n|
-        yield(bottom(n), top(n))
+    def execute
+      return unless @start && @limit
+      @next_to_insert = @start
+      while @next_to_insert < @limit || (@next_to_insert == 1 && @start == 1)
+        stride = @throttler.stride
+        affected_rows = @connection.update(copy(bottom, top(stride)))
+
+        if @throttler && affected_rows > 0
+          @throttler.run
+        end
+
+        @printer.notify(bottom, @limit)
+        @next_to_insert = top(stride) + 1
       end
+      @printer.end
     end
 
-    def traversable_chunks_size
-      @limit && @start ? ((@limit - @start + 1) / @stride.to_f).ceil : 0
+    def bottom
+      @next_to_insert
     end
 
-    def bottom(chunk)
-      (chunk - 1) * @stride + @start
-    end
-
-    def top(chunk)
-      [chunk * @stride + @start - 1, @limit].min
+    def top(stride)
+      [(@next_to_insert + stride - 1), @limit].min
     end
 
     def copy(lowest, highest)
@@ -88,18 +96,6 @@ module Lhm
       if @start && @limit && @start > @limit
         error("impossible chunk options (limit must be greater than start)")
       end
-    end
-
-    def execute
-      up_to do |lowest, highest|
-        affected_rows = @connection.update(copy(lowest, highest))
-
-        if affected_rows > 0
-          sleep(throttle_seconds)
-        end
-        @printer.notify(lowest, @limit)
-      end
-      @printer.end
     end
   end
 end

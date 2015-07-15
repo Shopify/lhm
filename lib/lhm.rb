@@ -4,6 +4,7 @@
 require 'lhm/table'
 require 'lhm/invoker'
 require 'lhm/connection'
+require 'lhm/throttler'
 require 'lhm/version'
 require 'logger'
 
