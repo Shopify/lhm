@@ -49,19 +49,42 @@ module Lhm
     true
   end
 
-  def self.cleanup(run = false)
-    lhm_tables = connection.select_values("show tables").select do |name|
-      name =~ /^lhm(a|n)_/
+  def self.cleanup(run = false, options = {})
+    drop_triggers_and_tables('lhm(a|n)_', run, options)
+  end
+
+  def self.cleanup_aborted(run = false, options = {})
+    drop_triggers_and_tables('lhmn_', run, options)
+  end
+
+  def self.drop_triggers_and_tables(pattern, run = false, options = {})
+    lhm_tables = connection.select_values('show tables').select { |name| name =~ /^#{pattern}/ }
+    if options[:until] && pattern != 'lhmn_'
+      lhm_tables.select! do |table|
+        table_date_time = Time.strptime(table, 'lhma_%Y_%m_%d_%H_%M_%S')
+        table_date_time <= options[:until]
+      end
     end
-    return true if lhm_tables.empty?
+
+    lhm_triggers = connection.select_values('show triggers').collect do |trigger|
+      trigger.respond_to?(:trigger) ? trigger.trigger : trigger
+    end.select { |name| name =~ /^lhmt/ }
+
     if run
+      lhm_triggers.each do |trigger|
+        connection.execute("drop trigger if exists #{trigger}")
+      end
       lhm_tables.each do |table|
-        connection.execute("drop table #{table}")
+        connection.execute("drop table if exists #{table}")
       end
       true
+    elsif lhm_tables.empty? && lhm_triggers.empty?
+      puts 'Everything is clean. Nothing to do.'
+      true
     else
-      puts "Existing LHM backup tables: #{lhm_tables.join(", ")}."
-      puts "Run Lhm.cleanup(true) to drop them all."
+      puts "Existing LHM tables: #{lhm_tables.join(', ')}."
+      puts "Existing LHM triggers: #{lhm_triggers.join(', ')}."
+      puts 'Run Lhm.cleanup(true) to drop them all.'
       false
     end
   end
