@@ -1,5 +1,11 @@
 module Lhm
   module Throttler
+
+    def self.format_hosts(hosts)
+      hosts.map { |host| host.partition(':')[0] }
+        .delete_if { |host| host == 'localhost' || host == '127.0.0.1' }
+    end
+
     class SlaveLag
       include Command
 
@@ -15,7 +21,8 @@ module Lhm
         @timeout_seconds = INITIAL_TIMEOUT
         @stride = options[:stride] || DEFAULT_STRIDE
         @allowed_lag = options[:allowed_lag] || DEFAULT_MAX_ALLOWED_LAG
-        @slave_connections = {}
+        @slaves = {}
+        @get_config = options[:current_config]
       end
 
       def execute
@@ -23,11 +30,6 @@ module Lhm
       end
 
       private
-
-      SQL_SELECT_SLAVE_HOSTS = "SELECT host FROM information_schema.processlist WHERE command='Binlog Dump'"
-      SQL_SELECT_MAX_SLAVE_LAG = 'SHOW SLAVE STATUS'
-
-      private_constant :SQL_SELECT_SLAVE_HOSTS, :SQL_SELECT_MAX_SLAVE_LAG
 
       def throttle_seconds
         lag = max_current_slave_lag
@@ -43,55 +45,78 @@ module Lhm
         end
       end
 
-      def slave_hosts
-        slaves = get_slaves.map { |slave_host| slave_host.partition(':')[0] }
-          .delete_if { |slave| slave == 'localhost' || slave == '127.0.0.1' }
-        Lhm.logger.info "Detected slaves: #{slaves.join(',')}"
-        slaves
+      def slaves
+        @slaves[@connection] ||= get_slaves
       end
 
       def get_slaves
-        @connection.select_values(SQL_SELECT_SLAVE_HOSTS)
+        slaves = []
+        slave_hosts = master_slave_hosts
+        while slave_hosts.any? do
+          host = slave_hosts.pop
+          slave = Slave.new(host, @get_config)
+          if slaves.map(&:host).exclude?(host) && slave.connection
+            slaves << slave
+            slave_hosts.concat(slave.slave_hosts)
+          end
+        end
+        slaves
+      end
+
+      def master_slave_hosts
+        Throttler.format_hosts(@connection.select_values(Slave::SQL_SELECT_SLAVE_HOSTS))
       end
 
       def max_current_slave_lag
-        max = slave_hosts.map { |slave| slave_lag(slave) }.flatten.push(0).max
+        max = slaves.map { |slave| slave.lag }.flatten.push(0).max
         Lhm.logger.info "Max current slave lag: #{max}"
         max
       end
+    end
 
-      def slave_lag(slave)
-        conn = slave_connection(slave)
-        if conn.respond_to?(:exec_query)
-          result = conn.exec_query(SQL_SELECT_MAX_SLAVE_LAG)
-          result.map { |row| row['Seconds_Behind_Master'].to_i }
-        else
-          result = conn.execute(SQL_SELECT_MAX_SLAVE_LAG)
-          fetch_slave_seconds(result)
+    class Slave
+      SQL_SELECT_SLAVE_HOSTS = "SELECT host FROM information_schema.processlist WHERE command='Binlog Dump'"
+      SQL_SELECT_MAX_SLAVE_LAG = 'SHOW SLAVE STATUS'
+
+      attr_reader :host, :connection
+
+      def initialize(host, get_config=nil)
+        @host = host
+        @connection = client(config(get_config))
+      end
+
+      def slave_hosts
+        Throttler.format_hosts(query_connection(SQL_SELECT_SLAVE_HOSTS, 'host'))
+      end
+
+      def lag
+        query_connection(SQL_SELECT_MAX_SLAVE_LAG, 'Seconds_Behind_Master')
+      end
+
+      private
+
+      def client(config)
+        begin
+          Mysql2::Client.new(config)
+        rescue Mysql2::Error => e
+          Lhm.logger.info "Error connecting to #{@host}: #{e}"
+          nil
         end
-      rescue Error => e
-        raise Lhm::Error, "Unable to connect and/or query slave to determine slave lag. Migration aborting because of: #{e}"
       end
 
-      def slave_connection(slave)
-        adapter_method = defined?(Mysql2) ? 'mysql2_connection' : 'mysql_connection'
-        config = ActiveRecord::Base.connection_pool.spec.config.dup
-        config[:host] = slave
-        ActiveRecord::Base.send(adapter_method, config)
+      def config(get_config)
+        config = get_config ? get_config.call : ActiveRecord::Base.connection_pool.spec.config.dup
+        config['host'] = @host
+        config
       end
 
-      # This method fetch the Seconds_Behind_Master, when exec_query is no available, on AR 2.3.
-      def fetch_slave_seconds(result)
-        unless result.is_a? Mysql::Result
-          Lhm.logger.info "Not a Mysql::Result from the slave assuming 0 lag"
-          return 0
+      def query_connection(query, result)
+        begin
+          @connection.query(query).map { |row| row[result] }
+        rescue Error => e
+          raise Lhm::Error, "Unable to connect and/or query slave to determine slave lag. Migration aborting because of: #{e}"
         end
-
-        keys = []
-        result.each_hash { |h| keys << h['Seconds_Behind_Master'].to_i }
-        keys
       end
-
     end
   end
 end
