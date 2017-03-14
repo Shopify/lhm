@@ -15,10 +15,11 @@ module Lhm
 
     attr_reader :name, :statements, :connection, :conditions, :renames
 
-    def initialize(table, connection = nil)
+    def initialize(table, connection = nil, options = nil)
       @connection = connection
       @origin = table
       @name = table.destination_name
+      @options = options
       @statements = []
       @renames = {}
     end
@@ -187,8 +188,12 @@ module Lhm
         error("could not find origin table #{ @origin.name }")
       end
 
-      unless @origin.satisfies_id_column_requirement?
-        error('origin does not satisfy `id` key requirements')
+      unless @origin.satisfies_primary_key?
+        if @options[:order_column]
+          error("order column needs to be specified because no satisfactory primary key exists") unless @origin.can_use_order_column?(@options[:order_column])
+        else
+          error("origin does not satisfy primary key requirements")
+        end
       end
 
       dest = @origin.destination_name
@@ -203,7 +208,7 @@ module Lhm
       @statements.each do |stmt|
         @connection.execute(tagged(stmt))
       end
-      Migration.new(@origin, destination_read, conditions, renames)
+      Migration.new(@origin, destination_read, order_column, conditions, renames)
     end
 
     def destination_create
@@ -229,6 +234,10 @@ module Lhm
       if index_name && !(index_name.is_a?(String) || index_name.is_a?(Symbol))
         raise ArgumentError, 'index_name must be a string or symbol'
       end
+    end
+
+    def order_column
+      @options[:order_column] || @origin.pk
     end
   end
 end

@@ -14,7 +14,7 @@ describe Lhm::Chunker do
   before(:each) do
     @origin = Lhm::Table.new('foo')
     @destination = Lhm::Table.new('bar')
-    @migration = Lhm::Migration.new(@origin, @destination)
+    @migration = Lhm::Migration.new(@origin, @destination, "id")
     @connection = MiniTest::Mock.new
     # This is a poor man's stub
     @throttler = Object.new
@@ -113,7 +113,7 @@ describe Lhm::Chunker do
                                                            :limit     => 2)
       @connection.expect(:update, 1) do |stmt|
         stmt = stmt.first if stmt.is_a?(Array)
-        stmt =~ /where \(foo.created_at > '2013-07-10' or foo.baz = 'quux'\) and `foo`/
+        stmt =~ /where \(foo.created_at > '2013-07-10' or foo.baz = 'quux'\) and foo/
       end
 
       def @migration.conditions
@@ -135,6 +135,25 @@ describe Lhm::Chunker do
 
       def @migration.conditions
         'inner join bar on foo.id = bar.foo_id'
+      end
+
+      @chunker.run
+      @connection.verify
+    end
+  end
+
+  describe "copy into with a different column to order by" do
+    before(:each) do
+      @migration   = Lhm::Migration.new(@origin, @destination, "weird_id")
+      @chunker = Lhm::Chunker.new(@migration, @connection, :throttler => @throttler,
+                                                         :start     => 1,
+                                                         :limit     => 2)
+    end
+
+    it "should copy the correct column" do
+      @connection.expect(:update, 1) do |stmt|
+        stmt = stmt.first if stmt.is_a?(Array)
+        stmt =~ /where foo.`weird_id`/
       end
 
       @chunker.run

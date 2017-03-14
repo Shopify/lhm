@@ -8,6 +8,8 @@ $password = YAML.load_file(File.expand_path(File.dirname(__FILE__)) + '/database
 require 'lhm/table'
 require 'lhm/sql_helper'
 
+Lhm.logger_params = {level: Logger::FATAL, file: '/dev/null'}
+
 module IntegrationHelper
   #
   # Connectivity
@@ -153,6 +155,14 @@ module IntegrationHelper
      where key_name = '#{ key_name }'
        and non_unique = #{ non_unique }
     >)
+  end
+
+  def with_per_thread_lhm_connection
+    pool = ActiveRecord::Base.establish_connection(adapter: 'mysql2', database: 'lhm')
+    pool.with_connection do |conn|
+      lhm_connection = Lhm::Connection.new(conn)
+      yield  lhm_connection
+    end
   end
 
   #

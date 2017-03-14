@@ -14,7 +14,7 @@ describe Lhm::Chunker do
     before(:each) do
       @origin = table_create(:origin)
       @destination = table_create(:destination)
-      @migration = Lhm::Migration.new(@origin, @destination)
+      @migration = Lhm::Migration.new(@origin, @destination, "id")
     end
 
     it 'should copy 1  rows from origin to destination even if the id of the single row does not start at 1' do

@@ -19,9 +19,9 @@ module Lhm
 
     attr_reader :migrator, :connection
 
-    def initialize(origin, connection)
+    def initialize(origin, connection, options)
       @connection = connection
-      @migrator = Migrator.new(origin, connection)
+      @migrator = Migrator.new(origin, connection, options)
     end
 
     def set_session_lock_wait_timeouts
@@ -38,6 +38,20 @@ module Lhm
     end
 
     def run(options = {})
+      Lhm.logger.info "Starting LHM run on table=#{@migrator.name}"
+
+      if !options.include?(:atomic_switch)
+        if supports_atomic_switch?
+          options[:atomic_switch] = true
+        else
+          raise Error.new(
+            "Using mysql #{version_string}. You must explicitly set " +
+            "options[:atomic_switch] (re SqlHelper#supports_atomic_switch?)")
+        end
+      end
+    end
+
+    def run(options = {})
       normalize_options(options)
       set_session_lock_wait_timeouts
       migration = @migrator.run
@@ -50,6 +64,10 @@ module Lhm
           LockedSwitcher.new(migration, @connection).run
         end
       end
+
+    rescue => e
+      Lhm.logger.error "LHM run failed with exception=#{e.class} message=#{e.message}"
+      raise
     end
 
     private

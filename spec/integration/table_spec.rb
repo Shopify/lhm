@@ -31,12 +31,12 @@ describe Lhm::Table do
       end
 
       it 'should return true for method that should be renamed' do
-        @table.satisfies_id_column_requirement?.must_equal true
+        @table.satisfies_primary_key?.must_equal true
       end
 
       it 'should support bigint tables' do
         @table = table_create(:bigint_table)
-        @table.satisfies_id_column_requirement?.must_equal true
+        @table.satisfies_primary_key?.must_equal true
       end
     end
 
@@ -47,7 +47,7 @@ describe Lhm::Table do
 
       it 'should return false for a non-int id column' do
         @table = table_create(:wo_id_int_column)
-        @table.satisfies_id_column_requirement?.must_equal false
+        @table.satisfies_primary_key?.must_equal false
       end
     end
   end
