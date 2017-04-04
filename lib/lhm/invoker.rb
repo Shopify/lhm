@@ -55,6 +55,7 @@ module Lhm
     private
 
     def normalize_options(options)
+      Lhm.logger = options[:kafka_logger] if options[:kafka_logger]
       Lhm.logger.info "Starting LHM run on table=#{@migrator.name}"
 
       unless options.include?(:atomic_switch)
