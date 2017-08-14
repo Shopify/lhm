@@ -44,6 +44,23 @@ describe Lhm::Chunker do
       @chunker.run
     end
 
+    it 'copies the last record of a table, even it is the start of the last chunk' do
+      @chunker = Lhm::Chunker.new(@migration, @connection, :throttler => @throttler,
+                                                           :start     => 2,
+                                                           :limit     => 10)
+      def @throttler.stride
+        2
+      end
+
+      @connection.expects(:update).with(regexp_matches(/between 2 and 3/)).returns(2)
+      @connection.expects(:update).with(regexp_matches(/between 4 and 5/)).returns(2)
+      @connection.expects(:update).with(regexp_matches(/between 6 and 7/)).returns(2)
+      @connection.expects(:update).with(regexp_matches(/between 8 and 9/)).returns(2)
+      @connection.expects(:update).with(regexp_matches(/between 10 and 10/)).returns(2)
+
+      @chunker.run
+    end
+
     it 'handles stride changes during execution' do
       # roll our own stubbing
       def @throttler.stride
@@ -78,6 +95,9 @@ describe Lhm::Chunker do
       @chunker = Lhm::Chunker.new(@migration, @connection, :throttler => @throttler,
                                                            :start     => 1,
                                                            :limit     => 2)
+      def @throttler.stride
+        2
+      end
 
       @connection.expects(:update).with(regexp_matches(/where \(foo.created_at > '2013-07-10' or foo.baz = 'quux'\) and `foo`/)).returns(1)
 
@@ -92,6 +112,9 @@ describe Lhm::Chunker do
       @chunker = Lhm::Chunker.new(@migration, @connection, :throttler => @throttler,
                                                            :start     => 1,
                                                            :limit     => 2)
+      def @throttler.stride
+        2
+      end
 
       @connection.expects(:update).with(regexp_matches(/inner join bar on foo.id = bar.foo_id and/)).returns(1)
 
