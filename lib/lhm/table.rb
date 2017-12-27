@@ -5,8 +5,7 @@ require 'lhm/sql_helper'
 
 module Lhm
   class Table
-    attr_reader :name, :columns, :indices, :pk, :ddl, :schema, :constraints
-
+    attr_reader :name, :columns, :indices, :pk, :ddl, :schema, :constraints, :references
     def initialize(name, pk = 'id', ddl = nil, schema = 'default')
       @name = name
       @table_name = TableName.new(name)
@@ -15,11 +14,16 @@ module Lhm
       @pk = pk
       @ddl = ddl
       @schema = schema
+      @references = []
       @constraints = {}
     end
 
     def satisfies_pk_requirement?
       @pk.is_a?(String) && !!(columns[@pk][:type] =~ /int\(\d+\)/)
+    end
+
+    def satisfies_references_column_requirement?
+        !references.any?
     end
 
     def destination_name
@@ -92,6 +96,10 @@ module Lhm
             table.indices[idx] = columns
           end
 
+          extract_references(read_references).each do |columns|
+            table.references << columns
+          end
+
           constraints = {}
           extract_constraints(read_constraints).each do |data|
             if data[:schema] == @schema_name && data[:table] == @table_name
@@ -121,6 +129,15 @@ module Lhm
           show indexes from `#{ @schema_name }`.`#{ @table_name }`
          where key_name != 'PRIMARY'
         }
+      end
+
+      def read_references
+          @connection.select_all %Q{
+          select constraint_name,table_name, table_schema, column_name
+            from information_schema.key_column_usage
+          where referenced_table_name = '#{ @table_name }'
+            and referenced_table_schema = '#{ @schema_name }'
+          }
       end
 
       def extract_indices(indices)
@@ -195,6 +212,10 @@ module Lhm
         end
 
         keys.length == 1 ? keys.first : keys
+      end
+
+      def extract_references(references)
+        references
       end
     end
 

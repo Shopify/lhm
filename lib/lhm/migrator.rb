@@ -191,6 +191,11 @@ module Lhm
         error('origin does not satisfy `id` key requirements')
       end
 
+      unless @origin.satisfies_references_column_requirement?
+        tables = @origin.references.map{|a| "#{a['table_name']}:#{a['constraint_name']}"}.join(', ')
+        error("foreign key constraint fails for tables (#{tables}); before running LHM migration you need to drop this foreign keys;")
+      end
+
       dest = @origin.destination_name
 
       if @connection.data_source_exists?(dest)
