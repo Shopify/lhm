@@ -215,18 +215,24 @@ Lhm.cleanup(true, until: Time.now - 86400)
 
 First, get set up for local development:
 
-    git clone git://github.com/soundcloud/lhm.git
-    cd lhm
+```
+dev clone lhm
+dev up
+```
 
-To run the tests, follow the instructions on [spec/README](https://github.com/soundcloud/lhm/blob/master/spec/README.md).
+To run the tests:
+```
+dev unit # unit tests
+dev int # integration tests
+dev test # all tests
+```
 
-We'll check out your contribution if you:
-
-  * Provide a comprehensive suite of tests for your fork.
-  * Have a clear and documented rationale for your changes.
-  * Package these up in a pull request.
-
-We'll do our best to help you out with any contribution issues you may have.
+### dbdeployer
+The integration tests rely on a master/slave replication setup of MySQL.
+We're using [dbdeployer](https://github.com/datacharmer/dbdeployer) to set this up via `./install.sh`.
+`dbdeployer` provides scripts for operating and accessing the nodes in `$HOME/sandboxes/rsandbox_5_7_22`.
+There is a lot in there, and most of time you shouldn't need to work with the nodes directly, but it's good
+to know where to go!
 
 ## License
 

@@ -1,0 +1,17 @@
+name: lhm
+up:
+  - homebrew:
+      - openssl
+      - shopify/shopify/mysql-client
+      - wget
+  - ruby: 2.5.0
+  - bundler
+  - custom:
+      name: Database
+      met?: test -f spec/integration/database.yml && test "$(~/sandboxes/rsandbox_5_7_22/status_all | grep on  | wc -l | xargs echo)" = "2"
+      meet: ./install.sh
+
+commands:
+  unit: bundle exec rake unit
+  int: bundle exec rake integration
+  test: bundle exec rake unit && bundle exec rake integration

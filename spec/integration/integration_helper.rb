@@ -4,13 +4,14 @@ require 'test_helper'
 require 'yaml'
 require 'active_support'
 
-config = YAML.load_file(File.expand_path(File.dirname(__FILE__)) + '/database.yml') rescue {}
-$lhm_user = config['user'] ||= 'root'
-$password = config['password'] ||= '1234'
-$master_host = config['master_host'] ||= '127.0.0.1'
-$master_port = config['master_port'] ||= 3306
-$slave_host = config['slave_host'] ||= '127.0.0.1'
-$slave_port = config['slave_port'] ||= 3307
+begin
+  $db_config = YAML.load_file(File.expand_path(File.dirname(__FILE__)) + '/database.yml')
+rescue StandardError => e
+  puts "Run install.sh to setup database"
+  raise e
+end
+
+$db_name = 'test'
 
 require 'lhm/table'
 require 'lhm/sql_helper'
@@ -24,15 +25,27 @@ module IntegrationHelper
   end
 
   def connect_master!
-    connect!($master_host, $master_port)
+    connect!(
+      '127.0.0.1',
+      $db_config['master']['port'],
+      $db_config['master']['user'],
+      $db_config['master']['password'],
+      $db_config['master']['socket']
+    )
   end
 
   def connect_slave!
-    connect!($slave_host, $slave_host)
+    connect!(
+      '127.0.0.1',
+      $db_config['slave']['port'],
+      $db_config['slave']['user'],
+      $db_config['slave']['password'],
+      $db_config['slave']['socket']
+    )
   end
 
-  def connect!(hostname, port)
-    adapter = ar_conn(hostname, port)
+  def connect!(hostname, port, user, password, socket)
+    adapter = ar_conn(hostname, port, user, password, socket)
     Lhm.setup(adapter)
     unless defined?(@@cleaned_up)
       Lhm.cleanup(true)
@@ -41,14 +54,15 @@ module IntegrationHelper
     @connection = adapter
   end
 
-  def ar_conn(host, port)
+  def ar_conn(host, port, user, password, socket)
     ActiveRecord::Base.establish_connection(
-      :adapter  => defined?(Mysql2) ? 'mysql2' : 'mysql',
+      :adapter  => 'mysql2',
       :host     => host,
-      :database => 'lhm',
-      :username => $lhm_user,
+      :username => user,
       :port     => port,
-      :password => $password
+      :password => password,
+      :socket   => socket,
+      :database => $db_name
     )
     ActiveRecord::Base.connection
   end
@@ -97,7 +111,7 @@ module IntegrationHelper
   # Helps testing behaviour when another client locks the db
   def start_locking_thread(lock_for, queue, locking_query)
     Thread.new do
-      conn = Mysql2::Client.new(host: '127.0.0.1', database: 'lhm', user: 'root', port: 3306)
+      conn = Mysql2::Client.new(host: '127.0.0.1', database: $db_name, user: 'root', port: 3306)
       conn.query('BEGIN')
       conn.query(locking_query)
       queue.push(true)
