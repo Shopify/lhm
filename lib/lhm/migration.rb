@@ -24,6 +24,10 @@ module Lhm
       Intersection.new(@origin, @destination, @renames)
     end
 
+    def origin_pk
+      @origin_pk ||= origin.pk
+    end
+
     def origin_name
       @table_name.original
     end

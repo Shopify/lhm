@@ -24,7 +24,7 @@ module Lhm
     def sql
       "insert ignore into `#{ @migration.destination_name }` (#{ @migration.destination_columns }) " \
       "select #{ @migration.origin_columns } from `#{ @migration.origin_name }` " \
-      "#{ conditions } `#{ @migration.origin_name }`.`id` between #{ @lowest } and #{ @highest }"
+      "#{ conditions } `#{ @migration.origin_name }`.`#{@migration.origin_pk}` between #{ @lowest } and #{ @highest }"
     end
 
     private

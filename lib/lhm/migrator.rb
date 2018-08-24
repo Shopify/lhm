@@ -187,7 +187,7 @@ module Lhm
         error("could not find origin table #{ @origin.name }")
       end
 
-      unless @origin.satisfies_id_column_requirement?
+      unless @origin.satisfies_pk_requirement?
         error('origin does not satisfy `id` key requirements')
       end
 

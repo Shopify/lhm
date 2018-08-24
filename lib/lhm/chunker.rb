@@ -51,7 +51,9 @@ module Lhm
     end
 
     def upper_id(next_id, stride)
-      top = connection.select_value("select id from `#{ @migration.origin_name }` where id >= #{ next_id } order by id limit 1 offset #{ stride - 1}")
+      pk = @migration.origin_pk
+
+      top = connection.select_value("select #{ pk } from `#{ @migration.origin_name }` where #{ pk } >= #{ next_id } order by #{ pk } limit 1 offset #{ stride - 1}")
       [top ? top.to_i : @limit, @limit].min
     end
 

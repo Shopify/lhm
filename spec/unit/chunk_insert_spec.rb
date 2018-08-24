@@ -40,5 +40,20 @@ describe Lhm::ChunkInsert do
         )
       end
     end
+
+    describe "when primary key is not id" do
+      before do
+        @origin = Lhm::Table.new('foo', 'foo_id')
+        @destination = Lhm::Table.new('bar', 'foo_id')
+        @migration = Lhm::Migration.new(@origin, @destination)
+      end
+
+      it "works with primary key not called id" do
+        assert_equal(
+          Lhm::ChunkInsert.new(@migration, @connection, 1, 2).sql,
+          "insert ignore into `bar` () select  from `foo` where `foo`.`foo_id` between 1 and 2"
+        )
+      end
+    end
   end
 end
