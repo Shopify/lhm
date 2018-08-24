@@ -167,6 +167,11 @@ module IntegrationHelper
     )
   end
 
+  def hash_slice(hash, keys)
+    return hash.slice(*keys) if hash.respond_to?(:slice)
+    keys.each { |k| [k, hash[k]] }.to_h
+  end
+
   #
   # Database Helpers
   #

@@ -8,6 +8,17 @@ require 'lhm/table'
 describe Lhm::Table do
   include UnitHelper
 
+  describe 'ddl' do
+    it 'should build the destination table' do
+      table = 'users'
+      schema = 'default'
+      @table = Lhm::Table.new(table, 'id', %Q{CREATE TABLE `#{table}` (random_constraint)}, schema)
+      @table.constraints['user_id'] = {:name => 'random_constraint', :referenced_column => true}
+      Lhm::Table.schema_constraints(schema, {'random_constraint_lhmn' => true})
+      @table.destination_ddl.must_equal %Q{CREATE TABLE `#{@table.destination_name}` (random_constraint_lhmn)}
+    end
+  end
+
   describe 'names' do
     it 'should name destination' do
       @table = Lhm::Table.new('users')
