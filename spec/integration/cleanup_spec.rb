@@ -132,5 +132,21 @@ describe Lhm, 'cleanup' do
         assert all_triggers.find { |t| t =~ /lhmt_(.*)_users/}
       end
     end
+
+    describe 'failed_name' do
+      before do
+        @fake_time = Time.now
+        Time.stubs(:now).returns(@fake_time)
+      end
+
+      after do
+        Time.unstub(:now)
+      end
+
+      it 'should provide a table name with a maximum length of 64' do
+        cleanup = Lhm::Cleanup::Current.new(nil, 'some_excessively_long_table_name', nil)
+        assert_equal cleanup.instance_eval { failed_name }, "lhma_#{Lhm::Timestamp.new(Time.now)}_some_excessively_long_table_name_fa"
+      end
+    end
   end
 end

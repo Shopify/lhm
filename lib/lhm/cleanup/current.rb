@@ -51,7 +51,8 @@ module Lhm
       end
 
       def failed_name
-        "lhma_#{Timestamp.new(Time.now)}_#{origin_table_name}_failed"
+        # NOTE: MySQL table names are limited to 64 characters
+        "lhma_#{Timestamp.new(Time.now)}_#{origin_table_name}_failed"[0..63]
       end
 
       def execute_ddls
