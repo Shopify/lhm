@@ -5,7 +5,7 @@ module Lhm
     end
 
     def to_s
-      @time.strftime "%Y_%m_%d_%H_%M_%S_#{ '%03d' % (@time.usec / 1000) }"
+      @time.strftime "%Y%m%d%H%M%S"
     end
   end
 end
