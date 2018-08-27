@@ -7,6 +7,7 @@ require 'lhm/chunk_insert'
 
 describe Lhm::ChunkInsert do
   before(:each) do
+    @connection = stub(:connection)
     @origin = Lhm::Table.new('foo')
     @destination = Lhm::Table.new('bar')
   end
@@ -17,7 +18,7 @@ describe Lhm::ChunkInsert do
 
       it "uses a simple where clause" do
         assert_equal(
-          Lhm::ChunkInsert.new(@migration, 1, 2).sql,
+          Lhm::ChunkInsert.new(@migration, @connection, 1, 2).sql,
           "insert ignore into `bar` () select  from `foo` where `foo`.`id` between 1 and 2"
         )
       end
@@ -34,7 +35,7 @@ describe Lhm::ChunkInsert do
 
       it "combines the clause with the chunking WHERE condition" do
         assert_equal(
-          Lhm::ChunkInsert.new(@migration, 1, 2).sql,
+          Lhm::ChunkInsert.new(@migration, @connection, 1, 2).sql,
           "insert ignore into `bar` () select  from `foo` where (foo.created_at > '2013-07-10' or foo.baz = 'quux') and `foo`.`id` between 1 and 2"
         )
       end

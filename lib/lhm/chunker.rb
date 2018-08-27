@@ -33,7 +33,7 @@ module Lhm
       while @next_to_insert <= @limit || (@start == @limit)
         stride = @throttler.stride
         top = upper_id(@next_to_insert, stride)
-        affected_rows = ChunkInsert.new(@migration, bottom, top).insert_and_return_count_of_rows_created(@connection)
+        affected_rows = ChunkInsert.new(@migration, @connection, bottom, top).insert_and_return_count_of_rows_created
         if @throttler && affected_rows > 0
           @throttler.run
         end

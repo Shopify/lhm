@@ -20,10 +20,7 @@ module Lhm
       @origin = migration.origin
       @destination = migration.destination
       @connection = connection
-      configure_retry({
-        tries: options.dig(:retriable, :tries) || 10,
-        base_interval: options.dig(:retriable, :base_interval) || 1
-      })
+      configure_retry(options[:retriable])
     end
 
     def entangle
@@ -89,13 +86,13 @@ module Lhm
 
     def before
       entangle.each do |stmt|
-        execute_with_retries(stmt)
+        connection_with_retries(statement: stmt, invoke_with: :execute)
       end
     end
 
     def after
       untangle.each do |stmt|
-        execute_with_retries(stmt)
+        connection_with_retries(statement: stmt, invoke_with: :execute)
       end
     end
 
