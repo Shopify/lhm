@@ -134,15 +134,6 @@ describe Lhm, 'cleanup' do
     end
 
     describe 'failed_name' do
-      before do
-        @fake_time = Time.now
-        Time.stubs(:now).returns(@fake_time)
-      end
-
-      after do
-        Time.unstub(:now)
-      end
-
       it 'should provide a table name with a maximum length of 64' do
         cleanup = Lhm::Cleanup::Current.new(nil, 'some_excessively_long_table_name_oh_dear_code_who_would_even_do_this_and_why', nil)
         assert_equal cleanup.instance_eval { failed_name }.size, 64
