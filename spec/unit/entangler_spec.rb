@@ -68,14 +68,6 @@ describe Lhm::Entangler do
       assert_raises(Mysql2::Error) { @entangler.before }
     end
 
-    it 'should not retry trigger creation with other mysql errors' do
-      connection = mock()
-      connection.expects(:execute).once.raises(Mysql2::Error, 'The MySQL server is running with the --read-only option so it cannot execute this statement.')
-
-      @entangler = Lhm::Entangler.new(@migration, connection, retriable: {base_interval: 0})
-      assert_raises(Mysql2::Error) { @entangler.before }
-    end
-
     it 'should succesfully finish after retrying' do
       connection = mock()
       connection.stubs(:execute).raises(Mysql2::Error, 'Lock wait timeout exceeded; try restarting transaction').then.returns(true)

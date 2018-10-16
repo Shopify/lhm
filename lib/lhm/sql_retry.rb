@@ -34,22 +34,7 @@ module Lhm
     # For a full list of configuration options see https://github.com/kamui/retriable
     def default_retry_config
       {
-        on: {
-          ActiveRecord::LockWaitTimeout => nil,
-          ActiveRecord::Deadlocked => nil,
-          Mysql2::Error => [
-            /Lock wait timeout exceeded/,
-            /Deadlock found when trying to get lock/,
-          ],
-          Mysql2::Error::TimeoutError => [
-            /Lock wait timeout exceeded/,
-            /Deadlock found when trying to get lock/,
-          ],
-          Exception => [
-            /Lock wait timeout exceeded/,
-            /Deadlock found when trying to get lock/,
-          ]
-        },
+        on: errors_to_retry,
         multiplier: 1, # each successive interval grows by this factor
         base_interval: 1, # the initial interval in seconds between tries.
         tries: 20, # Number of attempts to make at running your code block (includes initial attempt).
@@ -61,6 +46,29 @@ module Lhm
           Lhm.logger.info(log)
         end
       }.freeze
+    end
+
+    def errors_to_retry
+      errors_to_retry = {}
+      error_classes.each do |klass|
+        if Object.const_defined?(klass)
+          errors_to_retry[Kernel.const_get(klass)] = nil
+        end
+      end
+      errors_to_retry
+    end
+
+    def error_classes
+      %w(
+        ActiveRecord::LockWaitTimeout
+        ActiveRecord::Deadlocked
+        ActiveRecord::QueryTimedout
+        ActiveRecord::TransactionTimedout
+        ActiveRecord::ClientNotConnected
+        Mysql2::Error
+        Mysql2::Error::TimeoutError
+        Exception
+      )
     end
   end
 end
