@@ -32,34 +32,27 @@ describe Lhm do
         "constraint_name"=> "fk_origin_table_id",
         "table_name"=> "fk_child_table",
         "table_schema"=> "test",
-        "column_name"=> "origin_table_id"
-        }]
+        "column_name"=> "origin_table_id",
+        "referenced_column_name"=> "id"
+      }]
       actual.must_equal(expected)
     end
 
-    it 'should raise an exception for foreign key constraint fails for referencing tables' do
-      exception = assert_raises(Exception) {
-        Lhm.change_table(:origin_example) do |t|
-          t.add_column(:new_column, "INT(12) DEFAULT '0'")
-        end
-      }
-      references = table_read(:origin_example).references
-      tables = references.map{|a| "#{a['table_name']}:#{a['constraint_name']}"}.join(', ')
-      message = "foreign key constraint fails for tables (#{tables}); before running LHM migration you need to drop this foreign keys;"
-      assert_equal(message, exception.message )
-    end
-
-    it 'should add a column after droping foreign key constraints' do
-      execute "alter table `fk_child_table` drop foreign key `fk_origin_table_id`"
+    it 'migrates foreign key constraints for referencing tables' do
       Lhm.change_table(:origin_example) do |t|
         t.add_column(:new_column, "INT(12) DEFAULT '0'")
       end
       connect_master!
-      table_read(:origin_example).columns['new_column'].must_equal({
-        :type => 'int(12)',
-        :is_nullable => 'YES',
-        :column_default => '0',
-      })
+
+      actual = table_read(:origin_example).references
+      expected = [{
+        "constraint_name"=> "fk_origin_table_id",
+        "table_name"=> "fk_child_table",
+        "table_schema"=> "test",
+        "column_name"=> "origin_table_id",
+        "referenced_column_name"=> "id"
+      }]
+      actual.must_equal(expected)
     end
   end
 end

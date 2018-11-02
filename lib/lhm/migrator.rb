@@ -180,6 +180,10 @@ module Lhm
       @conditions = sql
     end
 
+    def before_switch
+      migrate_inbound_foreign_keys
+    end
+
     private
 
     def validate
@@ -189,11 +193,6 @@ module Lhm
 
       unless @origin.satisfies_pk_requirement?
         error('origin does not satisfy `id` key requirements')
-      end
-
-      unless @origin.satisfies_references_column_requirement?
-        tables = @origin.references.map{|a| "#{a['table_name']}:#{a['constraint_name']}"}.join(', ')
-        error("foreign key constraint fails for tables (#{tables}); before running LHM migration you need to drop this foreign keys;")
       end
 
       dest = @origin.destination_name
@@ -208,12 +207,23 @@ module Lhm
       @statements.each do |stmt|
         @connection.execute(tagged(stmt))
       end
+
       Migration.new(@origin, destination_read, conditions, renames)
     end
 
     def destination_create
       stmt = @origin.destination_ddl
       @connection.execute(tagged(stmt))
+    end
+
+    def migrate_inbound_foreign_keys
+      @origin.references.each do |reference|
+        drop_stmt = "ALTER TABLE #{reference['table_name']} DROP FOREIGN KEY #{reference['constraint_name']}"
+        @connection.execute(tagged(drop_stmt))
+
+        create_stmt = "ALTER TABLE #{reference['table_name']} ADD CONSTRAINT #{reference['constraint_name']} FOREIGN KEY (#{reference['column_name']}) REFERENCES #{@name}(#{reference['referenced_column_name']})"
+        @connection.execute(tagged(create_stmt))
+      end
     end
 
     def destination_read

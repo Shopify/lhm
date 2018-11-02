@@ -22,10 +22,6 @@ module Lhm
       @pk.is_a?(String) && !!(columns[@pk][:type] =~ /int\(\d+\)/)
     end
 
-    def satisfies_references_column_requirement?
-        !references.any?
-    end
-
     def destination_name
       @destination_name ||= @table_name.new
     end
@@ -133,7 +129,7 @@ module Lhm
 
       def read_references
           @connection.select_all %Q{
-          select constraint_name,table_name, table_schema, column_name
+          select constraint_name, table_name, table_schema, column_name, referenced_column_name
             from information_schema.key_column_usage
           where referenced_table_name = '#{ @table_name }'
             and referenced_table_schema = '#{ @schema_name }'
