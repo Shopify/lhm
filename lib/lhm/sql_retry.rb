@@ -42,6 +42,7 @@ module Lhm
             /Query execution was interrupted/,
             /Lost connection to MySQL server during query/,
             /Max connect timeout reached/,
+            /Unknown MySQL server host/,
           ]
         },
         multiplier: 1, # each successive interval grows by this factor
