@@ -20,6 +20,7 @@ module Lhm
       @connection = connection
       @chunk_finder = ChunkFinder.new(migration, connection, options)
       @options = options
+      @raise_on_warnings = options.fetch(:raise_on_warnings, false)
       @verifier = options[:verifier]
       if @throttler = options[:throttler]
         @throttler.connection = @connection if @throttler.respond_to?(:connection=)
@@ -44,6 +45,12 @@ module Lhm
         verify_can_run
 
         affected_rows = ChunkInsert.new(@migration, @connection, bottom, top, @options).insert_and_return_count_of_rows_created
+        expected_rows = top - bottom + 1
+
+        if affected_rows < expected_rows
+          raise_on_non_pk_duplicate_warning
+        end
+
         if @throttler && affected_rows > 0
           @throttler.run
         end
@@ -58,6 +65,16 @@ module Lhm
     end
 
     private
+
+    def raise_on_non_pk_duplicate_warning
+      @connection.query("show warnings").each do |level, code, message|
+        unless message.match?(/Duplicate entry .+ for key 'PRIMARY'/)
+          m = "Unexpected warning found for inserted row: #{message}"
+          Lhm.logger.warn(m)
+          raise Error.new(m) if @raise_on_warnings
+        end
+      end
+    end
 
     def bottom
       @next_to_insert

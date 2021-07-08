@@ -30,3 +30,16 @@ def without_verbose(&block)
 ensure
   $VERBOSE = old_verbose
 end
+
+def printer
+  printer = Lhm::Printer::Base.new
+
+  def printer.notify(*) ;end
+  def printer.end(*) [] ;end
+
+  printer
+end
+
+def throttler
+  Lhm::Throttler::Time.new(:stride => 100)
+end

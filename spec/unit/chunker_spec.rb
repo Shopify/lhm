@@ -41,6 +41,7 @@ describe Lhm::Chunker do
       @connection.expects(:select_value).with(regexp_matches(/where id >= 8 order by id limit 1 offset 4/)).returns(21)
       @connection.expects(:update).with(regexp_matches(/between 1 and 7/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/between 8 and 10/)).returns(2)
+      @connection.expects(:query).twice.with(regexp_matches(/show warnings/)).returns([])
 
       @chunker.run
     end
@@ -87,6 +88,8 @@ describe Lhm::Chunker do
       @connection.expects(:update).with(regexp_matches(/between 3 and 5/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/between 6 and 8/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/between 9 and 10/)).returns(2)
+
+      @connection.expects(:query).twice.with(regexp_matches(/show warnings/)).returns([])
 
       @chunker.run
     end
@@ -136,6 +139,7 @@ describe Lhm::Chunker do
 
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 1/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/where \(foo.created_at > '2013-07-10' or foo.baz = 'quux'\) and `foo`/)).returns(1)
+      @connection.expects(:query).with(regexp_matches(/show warnings/)).returns([])
 
       def @migration.conditions
         "where foo.created_at > '2013-07-10' or foo.baz = 'quux'"
@@ -155,6 +159,7 @@ describe Lhm::Chunker do
 
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 1/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/inner join bar on foo.id = bar.foo_id and/)).returns(1)
+      @connection.expects(:query).with(regexp_matches(/show warnings/)).returns([])
 
       def @migration.conditions
         'inner join bar on foo.id = bar.foo_id'
