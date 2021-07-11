@@ -51,7 +51,7 @@ describe Lhm::Chunker do
       23.times { |n| execute("insert into origin set id = '#{ n * n + 23 }'") }
 
       printer = MiniTest::Mock.new
-      printer.expect(:notify, :return_value, [Integer, Integer])
+      printer.expect(:notify, :return_value, [Integer, Integer, Hash])
       printer.expect(:end, :return_value, [])
 
       Lhm::Chunker.new(
@@ -88,7 +88,7 @@ describe Lhm::Chunker do
       23.times { |n| execute("insert into origin set id = '#{ 100000 + n * n + 23 }'") }
 
       printer = MiniTest::Mock.new
-      printer.expect(:notify, :return_value, [Integer, Integer])
+      printer.expect(:notify, :return_value, [Integer, Integer, Hash])
       printer.expect(:end, :return_value, [])
 
       Lhm::Chunker.new(
@@ -106,7 +106,7 @@ describe Lhm::Chunker do
       15.times { |n| execute("insert into origin set id = '#{ (n * n) + 1 }'") }
 
       printer = mock()
-      printer.expects(:notify).with(instance_of(Integer), instance_of(Integer)).twice
+      printer.expects(:notify).with(instance_of(Integer), instance_of(Integer), instance_of(Hash)).twice
       printer.expects(:end)
 
       throttler = Lhm::Throttler::SlaveLag.new(:stride => 10, :allowed_lag => 0)
@@ -129,7 +129,7 @@ describe Lhm::Chunker do
       15.times { |n| execute("insert into origin set id = '#{ (n * n) + 1 }'") }
 
       printer = mock()
-      printer.expects(:notify).with(instance_of(Integer), instance_of(Integer)).twice
+      printer.expects(:notify).with(instance_of(Integer), instance_of(Integer), instance_of(Hash)).twice
       printer.expects(:verify)
       printer.expects(:end)
 

@@ -18,9 +18,9 @@ module Lhm
         @max_length = 0
       end
 
-      def notify(lowest, highest)
-        return if !highest || highest == 0
-        message = "%.2f%% (#{lowest}/#{highest}) complete" % (lowest.to_f / highest * 100.0)
+      def notify(current_pk, max_pk, additional_info = {})
+        return if !max_pk || max_pk == 0
+        message = "%.2f%% (#{current_pk}/#{max_pk}) complete" % (current_pk.to_f / max_pk * 100.0)
         write(message)
       end
 

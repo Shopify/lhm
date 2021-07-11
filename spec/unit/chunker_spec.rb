@@ -3,13 +3,56 @@
 
 require File.expand_path(File.dirname(__FILE__)) + '/unit_helper'
 
+require 'active_support/testing/time_helpers'
+
 require 'lhm/table'
 require 'lhm/migration'
 require 'lhm/chunker'
 require 'lhm/throttler'
 
 describe Lhm::Chunker do
+  include ActiveSupport::Testing::TimeHelpers
   include UnitHelper
+
+  describe "Speedometer" do
+    before(:each) do
+      @window = 600
+      @start_time = Time.now
+      travel_to(@start_time)
+      @speedometer = Lhm::Chunker::Speedometer.new(@window)
+    end
+
+    after(:each) do
+      travel_back
+    end
+
+    describe "#speed" do
+      it "should return nil if there is not enough data points" do
+        @speedometer.speed.must_equal nil
+      end
+
+      it "should calculate difference for two points" do
+        later = @start_time + 10
+        travel_to(later)
+        @speedometer << 10
+        @speedometer.speed.must_equal 1.0
+      end
+
+      it "should keep one data point before the window" do
+        times = [10, 20, 30, 40, 300, 610, 620]
+        values = [431, 716, 1063, 1393, 10472, 21208, 21597]
+        times.each_with_index do |t, i|
+          travel_to(@start_time + times[i])
+          @speedometer << values[i]
+        end
+
+        @speedometer.log.length.must_equal times.length - 1
+        @speedometer.log[0][1].must_equal 716
+
+        assert (@speedometer.speed - 34.7799).abs < 0.00001
+      end
+    end
+  end
 
   before(:each) do
     @origin = Lhm::Table.new('foo')
@@ -37,6 +80,7 @@ describe Lhm::Chunker do
         5
       end
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 4/)).returns(7)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 8 order by id limit 1 offset 4/)).returns(21)
       @connection.expects(:update).with(regexp_matches(/between 1 and 7/)).returns(2)
@@ -51,6 +95,7 @@ describe Lhm::Chunker do
         2
       end
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 1/)).returns(2)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 3 order by id limit 1 offset 1/)).returns(4)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 5 order by id limit 1 offset 1/)).returns(6)
@@ -78,6 +123,7 @@ describe Lhm::Chunker do
         end
       end
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 1/)).returns(2)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 3 order by id limit 1 offset 2/)).returns(5)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 6 order by id limit 1 offset 2/)).returns(8)
@@ -96,6 +142,7 @@ describe Lhm::Chunker do
                                                            :start     => 1,
                                                            :limit     => 1)
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 0/)).returns(nil)
       @connection.expects(:update).with(regexp_matches(/between 1 and 1/)).returns(1)
 
@@ -110,6 +157,7 @@ describe Lhm::Chunker do
         2
       end
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 2 order by id limit 1 offset 1/)).returns(3)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 4 order by id limit 1 offset 1/)).returns(5)
       @connection.expects(:select_value).with(regexp_matches(/where id >= 6 order by id limit 1 offset 1/)).returns(7)
@@ -134,6 +182,7 @@ describe Lhm::Chunker do
         2
       end
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 1/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/where \(foo.created_at > '2013-07-10' or foo.baz = 'quux'\) and `foo`/)).returns(1)
 
@@ -153,6 +202,7 @@ describe Lhm::Chunker do
         2
       end
 
+      @connection.stubs(:select_rows).with(regexp_matches(/origin_table\.data_length \+ origin_table\.index_length/)).returns([[1024, 1048576]])
       @connection.expects(:select_value).with(regexp_matches(/where id >= 1 order by id limit 1 offset 1/)).returns(2)
       @connection.expects(:update).with(regexp_matches(/inner join bar on foo.id = bar.foo_id and/)).returns(1)
 
