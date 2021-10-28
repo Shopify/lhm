@@ -61,7 +61,9 @@ module Lhm
         end
 
         if @throttler && affected_rows > 0
-          @throttler.run
+          with_protected_connection do
+            @throttler.run
+          end
         end
 
         @next_to_insert = top + 1
@@ -76,6 +78,13 @@ module Lhm
     end
 
     private
+
+    def with_protected_connection(&block)
+      protected_connection = ActiveRecord::Base.connection_db_config
+      yield
+    ensure
+      ActiveRecord::Base.establish_connection(protected_connection)
+    end
 
     def raise_on_non_pk_duplicate_warning
       @connection.query("show warnings").each do |level, code, message|
