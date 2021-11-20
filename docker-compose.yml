@@ -5,10 +5,12 @@ services:
     image: percona:5.7
     command:
       --server-id=1
+      --log-bin
       --log-slave-updates=ON
       --gtid-mode=ON
       --enforce-gtid-consistency=ON
       --read-only=OFF
+      --max-connections=1000
     hostname: 'mysql-1'
     volumes:
       - ./scripts/mysql/writer:/docker-entrypoint-initdb.d
@@ -44,3 +46,4 @@ services:
     command: "proxysql -c /etc/proxysql.cnf -f --idle-threads"
     ports:
       - "33005:3306"
+      - "6032:6032"

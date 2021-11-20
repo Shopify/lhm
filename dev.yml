@@ -25,3 +25,9 @@ commands:
   logs:
     desc: "See the DB logs (ctrl-c + ctrl-c to exit)"
     run: docker-compose logs -f
+  mysql:
+    desc: Open a MySQL console
+    run: mysql --protocol=tcp -uroot -ppassword -P 33006
+  proxysql:
+    desc: Open a ProxySQL console
+    run: mysql -h127.0.0.1 -P6032 -uremote-admin -ppassword

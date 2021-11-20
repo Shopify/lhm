@@ -240,14 +240,14 @@ bundle exec rake unit # all tests
 You can run an individual test as follows:
 
 ```bash
-bundle exec rake unit TEST=spec/integration/atomic_switcher_spec.rb
+bundle exec rake unit TEST=spec/unit/atomic_switcher_spec.rb
 ```
 
 You can check the code coverage reporting for an individual test as follows:
 
 ```bash
 rm -rf coverage
-COV=1 bundle exec rake unit TEST=spec/integration/atomic_switcher_spec.rb
+COV=1 bundle exec rake unit TEST=spec/unit/atomic_switcher_spec.rb
 open coverage/index.html
 ```
 
