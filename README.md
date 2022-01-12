@@ -327,6 +327,10 @@ The license is included as [LICENSE](LICENSE) in this directory.
   * [Twitter][2]
   * [pt-online-schema-change][3]
 
+## External Documentation
+
+  * https://alexandreovertus.medium.com/lhm-to-the-railscue-701a105ddf52 (Explained example)
+
 [0]: http://openarkkit.googlecode.com
 [1]: http://www.facebook.com/note.php?note\_id=430801045932
 [2]: https://github.com/freels/table_migrator
