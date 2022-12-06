@@ -278,7 +278,7 @@ To run the tests:
 ```bash
 bundle exec rake unit # unit tests
 bundle exec rake integration # integration tests
-bundle exec rake unit # all tests
+bundle exec rake specs # all tests
 ```
 
 You can run an individual test as follows:
