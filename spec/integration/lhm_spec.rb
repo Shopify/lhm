@@ -512,6 +512,61 @@ describe Lhm do
       end
     end
 
+    it 'works when table has generated columns' do
+      table_create(:users)
+      execute("insert into `users` set id = 1, `username` = 'memyself'")
+      execute("insert into `users` set id = 2, `username` = 'youyourself'")
+
+      # Add a generated column
+      Lhm.change_table(:users) do |t|
+        t.add_column(:sample_generated_column, 'VARCHAR(255) GENERATED ALWAYS AS (SUBSTRING(`username`, -2))')
+      end
+
+      # Without the handling of generated columns
+      Lhm::Migrator.any_instance.stubs(:generated_column_names).returns([])
+      # without the Migration passing in generated columns to Intersection, we observe an error as an attempt to write
+      # directly into generated columns will fail.
+      exception = assert_raises ActiveRecord::StatementInvalid do
+        Lhm.change_table(:users) do |t|
+          t.add_column(:sample_additional_column, "VARCHAR(255)")
+        end
+      end
+      assert_match "The value specified for generated column 'sample_generated_column' in table 'lhmn_users' is not allowed.", exception.message
+
+      Lhm.cleanup(true)
+
+      # With the handling of generated columns
+      Lhm::Migrator.any_instance.unstub(:generated_column_names)
+      # As we are now skipping the writing to generated columns, this migration should succeed
+      Lhm.change_table(:users) do |t|
+        t.add_column(:sample_additional_column, "VARCHAR(255)")
+      end
+
+      slave do
+        # new column is added
+        value(table_read(:users).columns['sample_additional_column']).must_equal({
+          :type => 'varchar(255)',
+          :is_nullable => 'YES',
+          :column_default => nil,
+          :comment => '',
+          :collate => 'utf8_general_ci',
+        })
+
+        # generated column remains intact
+        value(table_read(:users).columns['sample_generated_column']).must_equal({
+          :type => 'varchar(255)',
+          :is_nullable => 'YES',
+          :column_default => nil,
+          :comment => '',
+          :collate => 'utf8_general_ci',
+        })
+      end
+
+      result = select_one('SELECT sample_generated_column FROM users')
+      # generated column populated appropriately
+      assert_match "lf", result["sample_generated_column"]
+    end
+
     it 'works when mysql reserved words are used' do
       table_create(:lines)
       execute("insert into `lines` set id = 1, `between` = 'foo'")
