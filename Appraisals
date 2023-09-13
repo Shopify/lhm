@@ -19,6 +19,11 @@ appraise "activerecord-6.1" do
 end
 
 # Latest version at the moment
-appraise "activerecord-7.0.0.alpha2" do
-  gem "activerecord", "7.0.0.alpha2"
+appraise "activerecord-7.0" do
+  gem "activerecord", "7.0.8"
+end
+
+# Next release
+appraise "activerecord-7.1.0.beta1" do
+  gem "activerecord", "7.1.0.beta1"
 end

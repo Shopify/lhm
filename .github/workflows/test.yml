@@ -22,7 +22,9 @@ jobs:
           - ruby-version: "2.7.5"
             activerecord-version: "6.1"
           - ruby-version: "3.0"
-            activerecord-version: "7.0.0.alpha2"
+            activerecord-version: "7.0"
+          - ruby-version: "3.2"
+            activerecord-version: "7.1.0.beta1"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
