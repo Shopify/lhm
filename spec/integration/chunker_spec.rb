@@ -136,9 +136,9 @@ describe Lhm::Chunker do
     it 'should copy 23 rows from origin to destination in one shot, regardless of the value of the id' do
       23.times { |n| execute("insert into origin set id = '#{ n * n + 23 }'") }
 
-      printer = MiniTest::Mock.new
-      printer.expect(:notify, :return_value, [Integer, Integer])
-      printer.expect(:end, :return_value, [])
+      printer = mock("printer")
+      printer.expects(:notify).with(kind_of(Integer), kind_of(Integer))
+      printer.expects(:end)
 
       Lhm::Chunker.new(
         @migration, connection, { throttler: throttler, printer: printer }
@@ -147,9 +147,6 @@ describe Lhm::Chunker do
       replica do
         value(count_all(@destination.name)).must_equal(23)
       end
-
-      printer.verify
-
     end
 
     it 'should copy all the records of a table, even if the last chunk starts with the last record of it.' do
@@ -169,9 +166,9 @@ describe Lhm::Chunker do
     it 'should copy 23 rows from origin to destination in one shot with replica lag based throttler, regardless of the value of the id' do
       23.times { |n| execute("insert into origin set id = '#{ 100000 + n * n + 23 }'") }
 
-      printer = MiniTest::Mock.new
-      printer.expect(:notify, :return_value, [Integer, Integer])
-      printer.expect(:end, :return_value, [])
+      printer = mock("printer")
+      printer.expects(:notify).with(kind_of(Integer), kind_of(Integer))
+      printer.expects(:end)
 
       Lhm::Throttler::Replica.any_instance.stubs(:replica_hosts).returns(['127.0.0.1'])
       Lhm::Throttler::ReplicaLag.any_instance.stubs(:master_replica_hosts).returns(['127.0.0.1'])
@@ -183,8 +180,6 @@ describe Lhm::Chunker do
       replica do
         value(count_all(@destination.name)).must_equal(23)
       end
-
-      printer.verify
     end
 
     it 'should throttle work stride based on replica lag' do

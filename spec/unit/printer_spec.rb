@@ -70,15 +70,11 @@ describe Lhm::Printer do
     end
 
     it 'prints the dots' do
-      mock  = MiniTest::Mock.new
-      10.times do
-        mock.expect(:write, :return_value, ['.'])
-      end
+      mock  = mock("output")
+      mock.expects(:write).with('.').times(10)
 
       @printer.instance_variable_set(:@output, mock)
       10.times { @printer.notify }
-
-      mock.verify
     end
 
   end
