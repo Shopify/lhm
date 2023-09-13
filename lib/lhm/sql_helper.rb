@@ -34,7 +34,7 @@ module Lhm
 
     def column_definition(cols)
       Array(cols).map do |column|
-        column.to_s.match(/`?([^\(]+)`?(\([^\)]+\))?/).captures
+        column.to_s.match(/`?([^\(\s]+)`?\s*(\([^\)]+\))?/).captures
       end
     end
 

@@ -22,7 +22,7 @@ describe Lhm::SqlHelper do
   end
 
   it 'should quote column names in index specification' do
-    value(Lhm::SqlHelper.idx_spec(['title(10)', 'album']))
-      .must_equal('`title`(10), `album`')
+    value(Lhm::SqlHelper.idx_spec(['title(10)', 'name (6)', 'album']))
+      .must_equal('`title`(10), `name`(6), `album`')
   end
 end

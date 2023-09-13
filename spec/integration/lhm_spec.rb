@@ -235,6 +235,16 @@ describe Lhm do
       end
     end
 
+    it 'should add an index with column sizes' do
+      Lhm.change_table(:users, :atomic_switch => false) do |t|
+        t.add_index(["username(6)", "comment (10)"])
+      end
+
+      replica do
+        value(index_on_columns?(:users, [:username, :comment])).must_equal(true)
+      end
+    end
+
     it 'should apply a ddl statement' do
       Lhm.change_table(:users, :atomic_switch => false) do |t|
         t.ddl('alter table %s add column flag tinyint(1)' % t.name)
