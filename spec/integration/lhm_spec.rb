@@ -237,11 +237,11 @@ describe Lhm do
 
     it 'should add an index with column sizes' do
       Lhm.change_table(:users, :atomic_switch => false) do |t|
-        t.add_index(["username(6)", "comment (10)"])
+        t.add_index(["username(6)", "group (10)", "comment     (10)"])
       end
 
       replica do
-        value(index_on_columns?(:users, [:username, :comment])).must_equal(true)
+        value(index_on_columns?(:users, [:username, :group, :comment])).must_equal(true)
       end
     end
 
