@@ -2,7 +2,6 @@
 .bundle
 pkg/*
 .rvmrc
-.ruby-version
 .ruby-gemset
 bin/rake
 gemfiles/vendor
