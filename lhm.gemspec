@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.executables   = []
   s.metadata['allowed_push_host'] = "https://rubygems.org"
 
-  s.required_ruby_version = '>= 2.3.0'
+  s.required_ruby_version = '>= 3.0.0'
 
   s.add_dependency 'retriable', '>= 3.0.0'
 
