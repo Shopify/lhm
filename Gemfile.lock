@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    lhm-shopify (3.5.5)
+    lhm-shopify (4.0.0)
       retriable (>= 3.0.0)
 
 GEM
