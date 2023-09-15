@@ -17,6 +17,8 @@ describe Lhm::Chunker do
       @migration = Lhm::Migration.new(@origin, @destination)
       @logs = StringIO.new
       Lhm.logger = Logger.new(@logs)
+      options = {throttler: throttler}
+      Lhm.progress = Lhm::Progress.new(@origin, connection, options: options)
     end
 
     def log_messages

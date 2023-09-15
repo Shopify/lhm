@@ -72,5 +72,17 @@ module Lhm
         @connection.execute(tagged(stmt))
       end
     end
+
+    def update_state_before_execute
+      Lhm.progress.update_state(Lhm::STATE_SWITCHING_TABLES)
+    end
+
+    def update_state_after_execute
+      Lhm.progress.update_state(Lhm::STATE_SWITCHED_TABLES)
+    end
+
+    def update_state_when_revert
+      Lhm.progress.update_state(Lhm::STATE_SWITCHING_TABLES_FAILED)
+    end
   end
 end

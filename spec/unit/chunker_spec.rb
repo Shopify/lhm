@@ -8,6 +8,7 @@ require 'lhm/migration'
 require 'lhm/chunker'
 require 'lhm/throttler'
 require 'lhm/connection'
+require 'lhm/progress'
 
 describe Lhm::Chunker do
   include UnitHelper
@@ -21,6 +22,13 @@ describe Lhm::Chunker do
     @migration = Lhm::Migration.new(@origin, @destination)
     @connection = mock()
     @connection.stubs(:execute).returns([["dummy"]])
+
+    # These methods will be called inside Progress by chunker. 
+    # The return value does not matter here, so any random values would work.
+    @connection.stubs(:current_database).returns('foo')
+    @connection.stubs(:select_rows).returns([[20, 80000]])
+    Lhm.progress = Lhm::Progress.new(@origin, @connection)
+
     # This is a poor man's stub
     @throttler = Object.new
     def @throttler.run

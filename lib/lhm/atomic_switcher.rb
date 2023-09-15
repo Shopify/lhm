@@ -42,5 +42,13 @@ module Lhm
     def execute
       @connection.execute(atomic_switch, should_retry: true, log_prefix: LOG_PREFIX)
     end
+
+    def update_state_before_execute
+      Lhm.progress.update_state(Lhm::STATE_SWITCHING_TABLES)
+    end
+
+    def update_state_after_execute
+      Lhm.progress.update_state(Lhm::STATE_SWITCHED_TABLES)
+    end
   end
 end

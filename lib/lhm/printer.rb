@@ -30,6 +30,9 @@ module Lhm
         write(message)
       end
 
+      def notify_progress(progress)
+      end
+
       def end
         write('100% complete')
       end

@@ -21,6 +21,7 @@ describe Lhm::AtomicSwitcher do
       @migration = Lhm::Migration.new(@origin, @destination)
       @logs = StringIO.new
       Lhm.logger = Logger.new(@logs)
+      Lhm.progress = Lhm::Progress.new(@origin, connection)
       @connection.execute('SET GLOBAL innodb_lock_wait_timeout=3')
       @connection.execute('SET GLOBAL lock_wait_timeout=3')
     end

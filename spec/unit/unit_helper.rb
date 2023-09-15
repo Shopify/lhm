@@ -23,4 +23,23 @@ module UnitHelper
       message   = $6
     end
   end
+
+  def progress
+    {
+      "state" => "copying",
+      "version" => "3.4.2", 
+      "source_table" => "foo", 
+      "destination_table" => "lhmn_foo", 
+      "throttler" => "None", 
+      "table_switcher" => "LockedSwitcher", 
+      "avg_row_length" => "20 bytes", 
+      "estimated_bytes_copied" => 0, 
+      "estimated_total_bytes" => 80000, 
+      "completion_percentage" => "0% complete", 
+      "estimated_copy_speed" => "0.0 bytes/sec", 
+      "min_pk_key" => 1, 
+      "max_pk_key" => 4000, 
+      "rows_written" => 0
+    }
+  end
 end

@@ -25,6 +25,7 @@ describe Lhm::LockedSwitcher do
       @origin = table_create('origin')
       @destination = table_create('destination')
       @migration = Lhm::Migration.new(@origin, @destination)
+      Lhm.progress = Lhm::Progress.new(@origin, connection)
     end
 
     it 'rename origin to archive' do

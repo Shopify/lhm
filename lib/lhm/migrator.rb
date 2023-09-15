@@ -235,5 +235,9 @@ module Lhm
         raise ArgumentError, 'index_name must be a string or symbol'
       end
     end
+
+    def update_state_when_revert
+      Lhm.progress.update_state(Lhm::STATE_SETUP_FAILED)
+    end
   end
 end

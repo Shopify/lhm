@@ -3,12 +3,15 @@
 
 require 'lhm/table_name'
 require 'lhm/table'
+require 'lhm/progress'
 require 'lhm/invoker'
 require 'lhm/throttler'
 require 'lhm/version'
 require 'lhm/cleanup/current'
 require 'lhm/sql_retry'
 require 'lhm/proxysql_helper'
+require 'lhm/connection'
+require 'lhm/test_support'
 require 'lhm/connection'
 require 'lhm/test_support'
 require 'lhm/railtie' if defined?(Rails::Railtie)
@@ -104,6 +107,14 @@ module Lhm
 
   def self.logger=(new_logger)
     @@logger = new_logger
+  end
+
+  def progress=(new_progress)
+    @@progress = new_progress
+  end
+
+  def progress
+    @@progress
   end
 
   def self.logger

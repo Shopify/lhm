@@ -20,6 +20,8 @@ describe Lhm::Entangler do
       @migration = Lhm::Migration.new(@origin, @destination)
       @connection = Lhm::Connection.new(connection: connection)
       @entangler = Lhm::Entangler.new(@migration, @connection)
+
+      Lhm.progress = Lhm::Progress.new(@origin, connection, options: {})
     end
 
     it 'should replay inserts from origin into destination' do

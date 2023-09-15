@@ -2,7 +2,6 @@
 # Schmidt
 require 'lhm/command'
 require 'lhm/sql_helper'
-require 'lhm/printer'
 require 'lhm/chunk_insert'
 require 'lhm/chunk_finder'
 
@@ -38,9 +37,11 @@ module Lhm
     end
 
     def execute
-      @start_time = Time.now
+      start_time = Time.now
 
       return if @chunk_finder.table_empty?
+      Lhm.progress.update_before_copy(@chunk_finder.start, @chunk_finder.limit)
+
       @next_to_insert = @start
       while @next_to_insert <= @limit || (@start == @limit)
         stride = @throttler.stride
@@ -50,11 +51,12 @@ module Lhm
         affected_rows = ChunkInsert.new(@migration, @connection, bottom, top, @retry_options).insert_and_return_count_of_rows_created
         expected_rows = top - bottom + 1
 
-        # Only log the chunker progress every 5 minutes instead of every iteration
+        # Only log the chunker progress every 1 minute instead of every iteration
         current_time = Time.now
-        if current_time - @start_time > (5 * 60)
-          Lhm.logger.info("Inserted #{affected_rows} rows into the destination table from #{bottom} to #{top}")
-          @start_time = current_time
+        if current_time - start_time > 60
+          Lhm.logger.info("Inserted #{Lhm.progress.rows_written} rows into the destination table 
+            upto #{top} with a speed of #{Lhm.progress.copy_speed}")
+          start_time = current_time
         end
 
         if affected_rows < expected_rows
@@ -67,6 +69,7 @@ module Lhm
 
         @next_to_insert = top + 1
         @printer.notify(bottom, @limit)
+        Lhm.progress.update_during_copy(affected_rows)
 
         break if @start == @limit
       end
@@ -74,6 +77,18 @@ module Lhm
     rescue => e
       @printer.exception(e) if @printer.respond_to?(:exception)
       raise
+    end
+
+    def update_state_before_execute
+      Lhm.progress.update_state(Lhm::STATE_COPYING)
+    end
+
+    def update_state_after_execute
+      Lhm.progress.update_state(Lhm::STATE_COPYING_DONE)
+    end
+
+    def update_state_when_revert
+      Lhm.progress.update_state(Lhm::STATE_COPYING_FAILED)
     end
 
     private
@@ -110,6 +125,5 @@ module Lhm
       return if @chunk_finder.table_empty?
       @chunk_finder.validate
     end
-
   end
 end

@@ -103,6 +103,19 @@ module Lhm
       after
     end
 
+    def update_state_before_block
+      Lhm.progress.update_state(Lhm::STATE_SETUP_DONE)
+    end
+
+    def update_state_when_revert
+      Lhm.progress.update_state(Lhm::STATE_SETUP_FAILED)
+    end
+
+    def update_state_after_block
+      Lhm.progress.update_state(Lhm::STATE_TRIGGERS_DROPPED)
+    end
+
+
     private
 
     def strip(sql)

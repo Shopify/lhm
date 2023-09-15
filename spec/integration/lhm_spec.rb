@@ -13,7 +13,7 @@ describe Lhm do
     it 'should migrate the table when id is pk' do
       table_create(:users)
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_column(:logins, "int(12) default '0'")
       end
 
@@ -31,7 +31,7 @@ describe Lhm do
     it 'should migrate the table when id is not pk' do
       table_create(:custom_primary_key)
 
-      Lhm.change_table(:custom_primary_key, :atomic_switch => false) do |t|
+      Lhm.change_table(:custom_primary_key, {:atomic_switch => false}) do |t|
         t.add_column(:logins, "int(12) default '0'")
       end
 
@@ -49,7 +49,7 @@ describe Lhm do
     it 'should migrate the table when using a composite primary key if id column exists' do
       table_create(:composite_primary_key)
 
-      Lhm.change_table(:composite_primary_key, :atomic_switch => false) do |t|
+      Lhm.change_table(:composite_primary_key, {:atomic_switch => false}) do |t|
         t.add_column(:logins, "int(12) default '0'")
       end
 
@@ -75,7 +75,7 @@ describe Lhm do
     describe 'when changing to a composite primary key' do
       it 'should be able to use ddl statement to create composite keys' do
 
-        Lhm.change_table(:users, :atomic_switch => false) do |t|
+        Lhm.change_table(:users, {:atomic_switch => false}) do |t|
           t.ddl("ALTER TABLE #{t.name} CHANGE id id bigint (20) NOT NULL")
           t.ddl("ALTER TABLE #{t.name} DROP PRIMARY KEY, ADD PRIMARY KEY (username, id)")
           t.ddl("ALTER TABLE #{t.name} ADD INDEX (id)")
@@ -96,7 +96,7 @@ describe Lhm do
         11.times { |n| execute("insert into tracks set id = #{n + 1}, public = 1") }
         11.times { |n| execute("insert into permissions set track_id = #{n + 1}") }
 
-        Lhm.change_table(:permissions, :atomic_switch => false) do |t|
+        Lhm.change_table(:permissions, {:atomic_switch => false}) do |t|
           t.filter('inner join tracks on tracks.`id` = permissions.`track_id` and tracks.`public` = 1')
         end
       end
@@ -128,7 +128,7 @@ describe Lhm do
     end
 
     it 'should add a column' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_column(:logins, "INT(12) DEFAULT '0'")
       end
 
@@ -146,7 +146,7 @@ describe Lhm do
     it 'should copy all rows' do
       23.times { |n| execute("insert into users set reference = '#{ n }'") }
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_column(:logins, "INT(12) DEFAULT '0'")
       end
 
@@ -156,7 +156,7 @@ describe Lhm do
     end
 
     it 'should remove a column' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.remove_column(:comment)
       end
 
@@ -166,7 +166,7 @@ describe Lhm do
     end
 
     it 'should add an index' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_index([:comment, :created_at])
       end
 
@@ -176,7 +176,7 @@ describe Lhm do
     end
 
     it 'should add an index with a custom name' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_index([:comment, :created_at], :my_index_name)
       end
 
@@ -186,7 +186,7 @@ describe Lhm do
     end
 
     it 'should add an index on a column with a reserved name' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_index(:group)
       end
 
@@ -196,7 +196,7 @@ describe Lhm do
     end
 
     it 'should add a unique index' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.add_unique_index(:comment)
       end
 
@@ -206,7 +206,7 @@ describe Lhm do
     end
 
     it 'should remove an index' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.remove_index([:username, :created_at])
       end
 
@@ -216,7 +216,7 @@ describe Lhm do
     end
 
     it 'should remove an index with a custom name' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.remove_index([:username, :group])
       end
 
@@ -226,7 +226,7 @@ describe Lhm do
     end
 
     it 'should remove an index with a custom name by name' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.remove_index(:irrelevant_column_name, :index_with_a_custom_name)
       end
 
@@ -246,7 +246,7 @@ describe Lhm do
     end
 
     it 'should apply a ddl statement' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.ddl('alter table %s add column flag tinyint(1)' % t.name)
       end
 
@@ -262,7 +262,7 @@ describe Lhm do
     end
 
     it 'should change a column' do
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.change_column(:comment, "varchar(20) DEFAULT 'none' NOT NULL")
       end
 
@@ -280,7 +280,7 @@ describe Lhm do
     it 'should change the last column in a table' do
       table_create(:small_table)
 
-      Lhm.change_table(:small_table, :atomic_switch => false) do |t|
+      Lhm.change_table(:small_table, {:atomic_switch => false}) do |t|
         t.change_column(:id, 'int(5)')
       end
 
@@ -299,7 +299,7 @@ describe Lhm do
       table_create(:users)
 
       execute("INSERT INTO users (username) VALUES ('a user')")
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:username, :login)
       end
 
@@ -324,7 +324,7 @@ describe Lhm do
       table_create(:users)
 
       execute("INSERT INTO users (username) VALUES ('a user')")
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:group, :fnord)
       end
 
@@ -351,7 +351,7 @@ describe Lhm do
       execute("ALTER TABLE users MODIFY `username` varchar(255) COLLATE utf8mb4_unicode_ci NULL")
       execute("INSERT INTO users (username) VALUES ('a user')")
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:username, :user_name)
       end
 
@@ -379,7 +379,7 @@ describe Lhm do
       execute("ALTER TABLE users MODIFY `reference` int(11) DEFAULT NULL COMMENT 'RefComment'")
       execute("INSERT INTO users (username,reference) VALUES ('a user', 10)")
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:reference, :ref)
       end
 
@@ -406,7 +406,7 @@ describe Lhm do
       execute("ALTER TABLE users MODIFY `group` varchar(255) NULL DEFAULT NULL")
       execute("INSERT INTO users (username) VALUES ('a user')")
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:group, :fnord)
       end
 
@@ -431,7 +431,7 @@ describe Lhm do
       table_create(:users)
       execute("INSERT INTO users (username) VALUES ('a user')")
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:username, :user_name)
       end
 
@@ -458,7 +458,7 @@ describe Lhm do
       execute("ALTER TABLE users MODIFY username varchar(255) NOT NULL")
       execute("INSERT INTO users (username) VALUES ('a user')")
 
-      Lhm.change_table(:users, :atomic_switch => false) do |t|
+      Lhm.change_table(:users, {:atomic_switch => false}) do |t|
         t.rename_column(:username, :user_name)
       end
 
