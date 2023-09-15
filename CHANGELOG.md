@@ -6,7 +6,7 @@
 * Fix errors when creating indexes with whitespace between column names and sizes. (https://github.com/Shopify/lhm/pull/145)
 * Test against Ruby 3.2 and Rails 7.1.0.beta1. (https://github.com/Shopify/lhm/pull/146)
 * Drop support for Ruby 2 and Rails 5. (https://github.com/Shopify/lhm/pull/148)
-* Fix Fix thread throttler #stride API. (https://github.com/Shopify/lhm/pull/131)
+* Fix thread throttler #stride API. (https://github.com/Shopify/lhm/pull/131)
 
 # 3.5.5 (Jan, 2022)
 * Fix error where from Config shadowing which would cause LHM to abort on reconnect (https://github.com/Shopify/lhm/pull/128)
