@@ -35,6 +35,14 @@ module IntegrationHelper
     @connection
   end
 
+  def mysql_version
+    @mysql_version ||= begin
+      # This SQL returns a value of shape: X.Y.ZZ-AA-log
+      result = connection.query("SELECT VERSION()")
+      result.dig(0, 0).split("-", 2)[0]
+    end
+  end
+
   def connect_proxysql!
     connect!(
       '127.0.0.1',

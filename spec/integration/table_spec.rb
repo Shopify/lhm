@@ -23,7 +23,7 @@ describe Lhm::Table do
       end
 
       it 'should parse columns' do
-        value(@table.columns['id'][:type]).must_match(/(bigint|int)\(\d+\)/)
+        value(@table.columns['id'][:type]).must_match(/(bigint|int)(\(\d+\))?/)
       end
 
       it 'should return true for method that should be renamed' do

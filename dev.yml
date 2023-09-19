@@ -40,7 +40,10 @@ commands:
     desc: "See the DB logs (ctrl-c + ctrl-c to exit)"
     run: podman-compose logs -f
   clear:
+    aliases: [ mysql5 ]
     run: podman-compose down -v && podman-compose up -d && ./scripts/helpers/wait-for-dbs.sh
+  mysql8:
+    run: podman-compose down -v && podman-compose -f docker-compose-mysql-8.yml up -d && ./scripts/helpers/wait-for-dbs.sh
   pre-publish:
     # Ensures all Gemfile.lock are sync with the new version in `lhm/version.rb` and runs appraisals
     run: bundle install && bundle exec appraisal install && bundle exec appraisal rake specs

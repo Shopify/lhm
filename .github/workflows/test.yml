@@ -17,12 +17,16 @@ jobs:
         include:
           - ruby-version: "3.0"
             activerecord-version: "6.0"
+            mysql_version: "5"
           - ruby-version: "3.1"
             activerecord-version: "6.1"
+            mysql_version: "5"
           - ruby-version: "3.2"
             activerecord-version: "7.0"
+            mysql_version: "8"
           - ruby-version: "3.2"
             activerecord-version: "7.1.0.beta1"
+            mysql_version: "8"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
@@ -35,7 +39,7 @@ jobs:
       - name: Install Ubuntu packages
         run: sudo apt-get update && sudo apt-get install numactl libaio-dev libmysqlclient-dev
       - name: Setup MySQL and ProxySQL (docker-compose)
-        run: docker-compose up -d # Might have to change to docker compose up -d (i.e. Compose V2) when the Ubuntu image changes the docker-compose version
+        run: docker-compose -f docker-compose-mysql-${{ matrix.mysql_version }}.yml up -d # Might have to change to docker compose up -d (i.e. Compose V2) when the Ubuntu image changes the docker-compose version
       - name: Wait until DBs are alive
         run: ./scripts/helpers/wait-for-dbs.sh
         timeout-minutes: 2

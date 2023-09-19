@@ -14,13 +14,21 @@ class LockWaitTimeoutTestHelper
 
     @lock_duration = lock_duration
 
-    # While implementing this, I discovered that MySQL seems to have an off-by-one
-    # bug with the innodb_lock_wait_timeout. If you ask it to wait 2 seconds, it will wait 3.
-    # In order to avoid surprisingly the user, let's account for that here, but also
-    # guard against a case where we go below 1, the minimum value.
-    raise ArgumentError, "innodb_lock_wait_timeout must be greater than or equal to 2" unless innodb_lock_wait_timeout >= 2
     raise ArgumentError, "innodb_lock_wait_timeout must be an integer" if innodb_lock_wait_timeout.class != Integer
-    @innodb_lock_wait_timeout = innodb_lock_wait_timeout - 1
+
+    result = @main_conn.query("SELECT VERSION()")
+    mysql_version = result.to_a.dig(0, "VERSION()").split("-", 2)[0]
+
+    if mysql_version.start_with?("8")
+      @innodb_lock_wait_timeout = innodb_lock_wait_timeout
+    else
+      # While implementing this, I discovered that MySQL seems to have an off-by-one
+      # bug with the innodb_lock_wait_timeout. If you ask it to wait 2 seconds, it will wait 3.
+      # In order to avoid surprisingly the user, let's account for that here, but also
+      # guard against a case where we go below 1, the minimum value.
+      raise ArgumentError, "innodb_lock_wait_timeout must be greater than or equal to 2" unless innodb_lock_wait_timeout >= 2
+      @innodb_lock_wait_timeout = innodb_lock_wait_timeout - 1
+    end
 
     @threads = []
     @queue = Queue.new

@@ -9,6 +9,10 @@ describe Lhm do
 
   before(:each) { connect_master!; Lhm.cleanup(true) }
 
+  let(:collation) do
+    mysql_version.start_with?("8.0") ? "utf8mb3_general_ci" : "utf8_general_ci"
+  end
+
   describe 'id column requirement' do
     it 'should migrate the table when id is pk' do
       table_create(:users)
@@ -17,9 +21,11 @@ describe Lhm do
         t.add_column(:logins, "int(12) default '0'")
       end
 
+      expected_type = mysql_version.start_with?("8.0") ? "int" : "int(12)"
+
       replica do
         value(table_read(:users).columns['logins']).must_equal({
-          :type           => 'int(12)',
+          :type           => expected_type,
           :is_nullable    => 'YES',
           :column_default => '0',
           :comment => '',
@@ -35,9 +41,11 @@ describe Lhm do
         t.add_column(:logins, "int(12) default '0'")
       end
 
+      expected_type = mysql_version.start_with?("8.0") ? "int" : "int(12)"
+
       replica do
         value(table_read(:custom_primary_key).columns['logins']).must_equal({
-          :type           => 'int(12)',
+          :type           => expected_type,
           :is_nullable    => 'YES',
           :column_default => '0',
           :comment => '',
@@ -53,9 +61,11 @@ describe Lhm do
         t.add_column(:logins, "int(12) default '0'")
       end
 
+      expected_type = mysql_version.start_with?("8.0") ? "int" : "int(12)"
+
       replica do
         value(table_read(:composite_primary_key).columns['logins']).must_equal({
-          :type           => 'int(12)',
+          :type           => expected_type,
           :is_nullable    => 'YES',
           :column_default => '0',
           :comment => '',
@@ -132,9 +142,11 @@ describe Lhm do
         t.add_column(:logins, "INT(12) DEFAULT '0'")
       end
 
+      expected_type = mysql_version.start_with?("8.0") ? "int" : "int(12)"
+
       replica do
         value(table_read(:users).columns['logins']).must_equal({
-          :type => 'int(12)',
+          :type => expected_type,
           :is_nullable => 'YES',
           :column_default => '0',
           :comment => '',
@@ -272,7 +284,7 @@ describe Lhm do
           :is_nullable => 'NO',
           :column_default => 'none',
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
       end
     end
@@ -284,9 +296,11 @@ describe Lhm do
         t.change_column(:id, 'int(5)')
       end
 
+      expected_type = mysql_version.start_with?("8.0") ? "int" : "int(5)"
+
       replica do
         value(table_read(:small_table).columns['id']).must_equal({
-          :type => 'int(5)',
+          :type => expected_type,
           :is_nullable => 'NO',
           :column_default => nil,
           :comment => '',
@@ -311,7 +325,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
 
         result = select_one('SELECT login from users')
@@ -336,7 +350,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => 'Superfriends',
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
 
         result = select_one('SELECT `fnord` from users')
@@ -383,11 +397,13 @@ describe Lhm do
         t.rename_column(:reference, :ref)
       end
 
+      expected_type = mysql_version.start_with?("8.0") ? "int" : "int(11)"
+
       replica do
         table_data = table_read(:users)
         assert_nil table_data.columns['reference']
         value(table_read(:users).columns['ref']).must_equal({
-           :type => 'int(11)',
+           :type => expected_type,
            :is_nullable => 'YES',
            :column_default => nil,
            :comment => 'RefComment',
@@ -418,7 +434,7 @@ describe Lhm do
            :is_nullable => 'YES',
            :column_default => nil,
            :comment => '',
-           :collate => 'utf8_general_ci',
+           :collate => collation,
          })
 
         result = select_one('SELECT `fnord` from users')
@@ -443,7 +459,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
 
         result = select_one('SELECT `user_name` from users')
@@ -470,7 +486,7 @@ describe Lhm do
           :is_nullable => 'NO',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
 
         result = select_one('SELECT `user_name` from users')
@@ -517,7 +533,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => 'Superfriends',
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
       end
     end

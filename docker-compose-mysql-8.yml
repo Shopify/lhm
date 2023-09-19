@@ -1,0 +1,63 @@
+services:
+  #  Writer
+  mysql-1:
+    container_name: mysql-1
+    image: percona:8.0
+    platform: linux/amd64
+    command:
+      --server-id=1
+      --log-bin
+      --log-slave-updates=ON
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --read-only=OFF
+      --max-connections=1000
+      --default-authentication-plugin=mysql_native_password
+    hostname: 'mysql-1'
+    volumes:
+      - ./scripts/mysql/writer:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_HOST: mysql-1
+    ports:
+      - "33006:3306"
+  #  Reader
+  mysql-2:
+    container_name: mysql-2
+    image: percona:8.0
+    platform: linux/amd64
+    command:
+      --server-id=2
+      --log-bin
+      --log-slave-updates=ON
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --read-only=ON
+      --max-connections=1000
+      --default-authentication-plugin=mysql_native_password
+    hostname: 'mysql-2'
+    volumes:
+      - ./scripts/mysql/reader:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_HOST: mysql-2
+    ports:
+      - "33007:3306"
+  #  Proxysql
+  proxysql:
+    container_name: proxysql
+    image: proxysql/proxysql:2.0.11
+    platform: linux/amd64
+    volumes:
+      - ./scripts/proxysql/proxysql.cnf:/etc/proxysql.cnf
+    command: "proxysql -c /etc/proxysql.cnf -f --idle-threads"
+    ports:
+      - "33005:3306"
+      - "6032:6032"
+  toxiproxy:
+    container_name: toxiproxy
+    image: "ghcr.io/shopify/toxiproxy"
+    ports:
+      - "8474:8474"
+      - "22220:22220"
+      - "22222:22222"
