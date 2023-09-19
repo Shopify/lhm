@@ -1,4 +1,5 @@
 # Unreleased
+* Test against MySQL 8.0.
 
 # 4.0.0 (Sep, 2023)
 * Deprecate `SlaveLag` throttler class name. Use `ReplicaLag` instead (https://github.com/Shopify/lhm/pull/144)
