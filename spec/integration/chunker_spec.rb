@@ -10,14 +10,6 @@ describe Lhm::Chunker do
 
   before(:each) { connect_master! }
 
-  let(:error_key) do
-    if mysql_version.start_with?("8")
-      "custom_primary_key_dest.index_custom_primary_key_on_id"
-    else
-      "index_custom_primary_key_on_id"
-    end
-  end
-
   describe 'copying' do
     before(:each) do
       @origin = table_create(:origin)
@@ -82,6 +74,7 @@ describe Lhm::Chunker do
         Lhm::Chunker.new(migration, connection, {raise_on_warnings: true, throttler: throttler, printer: printer} ).run
       end
 
+      error_key = index_key("custom_primary_key_dest", "index_custom_primary_key_on_id")
       assert_match "Unexpected warning found for inserted row: Duplicate entry '1001' for key '#{error_key}'", exception.message
     end
 
@@ -94,6 +87,8 @@ describe Lhm::Chunker do
       execute("insert into custom_primary_key_dest set id = 1001, pk = 2")
 
       Lhm::Chunker.new(migration, connection, {throttler: throttler, printer: printer} ).run
+
+      error_key = index_key("custom_primary_key_dest", "index_custom_primary_key_on_id")
 
       assert_equal 2, log_messages.length
       assert log_messages[1].include?("Unexpected warning found for inserted row: Duplicate entry '1001' for key '#{error_key}'"), log_messages
@@ -111,6 +106,8 @@ describe Lhm::Chunker do
 
       Lhm::Chunker.new(migration, connection, {throttler: throttler, printer: printer} ).run
 
+      error_key = index_key("custom_primary_key_dest", "index_custom_primary_key_on_id")
+
       assert_equal 3, log_messages.length
       assert log_messages[1].include?("Unexpected warning found for inserted row: Duplicate entry '1001' for key '#{error_key}'"), log_messages
       assert log_messages[2].include?("Unexpected warning found for inserted row: Duplicate entry '1002' for key '#{error_key}'"), log_messages
@@ -125,6 +122,8 @@ describe Lhm::Chunker do
       execute("insert into custom_primary_key_dest set id = 1001, pk = 2")
 
       Lhm::Chunker.new(migration, connection, {raise_on_warnings: false, throttler: throttler, printer: printer} ).run
+
+      error_key = index_key("custom_primary_key_dest", "index_custom_primary_key_on_id")
 
       assert_equal 2, log_messages.length
       assert log_messages[1].include?("Unexpected warning found for inserted row: Duplicate entry '1001' for key '#{error_key}'"), log_messages
@@ -267,6 +266,14 @@ describe Lhm::Chunker do
       replica do
         value(count_all(@destination.name)).must_equal(0)
       end
+    end
+  end
+
+  def index_key(table_name, index_name)
+    if mysql_version.start_with?("8")
+      "#{table_name}.#{index_name}"
+    else
+      index_name
     end
   end
 end

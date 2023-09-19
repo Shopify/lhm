@@ -17,16 +17,16 @@ jobs:
         include:
           - ruby-version: "3.0"
             activerecord-version: "6.0"
-            mysql_version: "5"
+            mysql_version: "5.7"
           - ruby-version: "3.1"
             activerecord-version: "6.1"
-            mysql_version: "5"
+            mysql_version: "5.7"
           - ruby-version: "3.2"
             activerecord-version: "7.0"
-            mysql_version: "8"
+            mysql_version: "8.0"
           - ruby-version: "3.2"
             activerecord-version: "7.1.0.beta1"
-            mysql_version: "8"
+            mysql_version: "8.0"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
