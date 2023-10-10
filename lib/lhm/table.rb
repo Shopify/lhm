@@ -41,7 +41,13 @@ module Lhm
       def ddl
         sql = "show create table `#{ @table_name }`"
         specification = nil
-        @connection.execute(sql).each { |row| specification = row.last }
+        @connection.execute(sql).each do |row|
+          specification = if row.is_a?(Hash)
+            row.values.last
+          else
+            row.last
+          end
+        end
         specification
       end
 
