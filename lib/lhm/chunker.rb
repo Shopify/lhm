@@ -23,7 +23,8 @@ module Lhm
       @chunk_finder = ChunkFinder.new(migration, connection, options)
       @options = options
       @raise_on_warnings = options.fetch(:raise_on_warnings, false)
-      @pk_duplicate_warning_regexp ||= /Duplicate entry .+ for key '(#{@migration.destination_name}\.)?PRIMARY'/
+      @ignore_warning_regexps = [/Duplicate entry .+ for key '(#{@migration.destination_name}\.)?PRIMARY'/]
+      @ignore_warning_regexps.concat(options.fetch(:ignore_warning_regexps, []))
       @verifier = options[:verifier]
       if @throttler = options[:throttler]
         @throttler.connection = @connection if @throttler.respond_to?(:connection=)
@@ -59,7 +60,7 @@ module Lhm
         end
 
         if affected_rows < expected_rows
-          raise_on_non_pk_duplicate_warning
+          raise_on_warning
         end
 
         if @throttler && affected_rows > 0
@@ -79,9 +80,9 @@ module Lhm
 
     private
 
-    def raise_on_non_pk_duplicate_warning
+    def raise_on_warning
       @connection.select_all("SHOW WARNINGS", should_retry: true, log_prefix: LOG_PREFIX).each do |row|
-        next if row["Message"].match?(@pk_duplicate_warning_regexp)
+        next if @ignore_warning_regexps.any? { |regexp| row["Message"].match?(regexp) }
 
         m = "Unexpected warning found for inserted row: #{row["Message"]}"
         Lhm.logger.warn(m)
