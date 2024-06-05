@@ -8,12 +8,13 @@ module Lhm
   class Migration
     attr_reader :origin, :destination, :conditions, :renames
 
-    def initialize(origin, destination, conditions = nil, renames = {}, time = Time.now)
+    def initialize(origin, destination, conditions = nil, renames = {}, time = Time.now, generated_column_names = [])
       @origin = origin
       @destination = destination
       @conditions = conditions
       @renames = renames
       @table_name = TableName.new(@origin.name, time)
+      @generated_column_names = generated_column_names
     end
 
     def archive_name
@@ -21,7 +22,7 @@ module Lhm
     end
 
     def intersection
-      Intersection.new(@origin, @destination, @renames)
+      Intersection.new(@origin, @destination, @renames, @generated_column_names)
     end
 
     def origin_name
