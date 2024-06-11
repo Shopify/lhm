@@ -538,6 +538,27 @@ describe Lhm do
       end
     end
 
+    it 'should rename with fulltext index on table' do
+      table_create(:users)
+      execute("ALTER TABLE users ADD FULLTEXT(description)")
+
+      Lhm.change_table(:users, :atomic_switch => false) do |t|
+        t.rename_column(:username, :login)
+      end
+
+      replica do
+        table_data = table_read(:users)
+        assert_nil table_data.columns['username']
+        value(table_read(:users).columns['login']).must_equal({
+          :type => 'varchar(255)',
+          :is_nullable => 'YES',
+          :column_default => nil,
+          :comment => '',
+          :collate => collation,
+        })
+      end
+    end
+
     it 'works when mysql reserved words are used' do
       table_create(:lines)
       execute("insert into `lines` set id = 1, `between` = 'foo'")
