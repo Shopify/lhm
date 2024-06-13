@@ -116,6 +116,18 @@ module Lhm
       end
   end
 
+  @@disallow_inline = false
+
+  # Use to control the inline-execution of Lhm migrations - by default migrations are inlined
+  # in test and development environments, and in some cases that's not desireable.
+  def self.disallow_inline!
+    @@disallow_inline = true
+  end
+
+  def self.inline_allowed?
+    !@@disallow_inline
+  end
+
   private
 
   def drop_tables_and_triggers(run = false, triggers, tables)
