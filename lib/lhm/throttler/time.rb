@@ -6,7 +6,7 @@ module Lhm
       DEFAULT_TIMEOUT = 0.1
       DEFAULT_STRIDE = 2_000
       DEFAULT_BACKOFF_REDUCTION_FACTOR = 0.2 # 20%
-      MIN_STRIDE_SIZE = 5
+      MIN_STRIDE_SIZE = 1
 
       attr_accessor :timeout_seconds
       attr_accessor :stride
