@@ -96,7 +96,7 @@ module Lhm
       untangle.each do |stmt|
         @connection.execute(stmt, should_retry: true, log_prefix: LOG_PREFIX)
       end
-      Lhm.logger.info("Dropped triggers on #{@origin.name}")
+      Lhm.logger.info("[new] Dropped triggers on #{@origin.name}")
     end
 
     def revert

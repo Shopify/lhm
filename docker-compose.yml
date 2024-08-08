@@ -2,8 +2,9 @@ services:
   #  Writer
   mysql-1:
     container_name: mysql-1
-    image: percona:5.7
-    platform: linux/amd64
+    image: mysql:8.0
+    # image: percona:5.7
+    # platform: linux/amd64
     command:
       --server-id=1
       --log-bin
@@ -23,8 +24,9 @@ services:
   #  Reader
   mysql-2:
     container_name: mysql-2
-    image: percona:5.7
-    platform: linux/amd64
+    image: mysql:8.0
+    # image: percona:5.7
+    # platform: linux/amd64
     command:
       --server-id=2
       --log-bin

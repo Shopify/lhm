@@ -14,7 +14,8 @@ up:
       meet: ":"
   - custom:
       name: Podman compose
-      met?: podman-compose ps | grep -ioE -q "lhm.*running\(4\)"
+      # met?: podman-compose ps | grep -ioE -q "lhm.*running\(4\)"
+      met?: podman-compose ps | grep -ioE -q "mysql"
       meet: podman-compose up -d
   - custom:
       name: Waiting for DBs to be operational
