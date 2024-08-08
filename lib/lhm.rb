@@ -52,6 +52,8 @@ module Lhm
   # @return [Boolean] Returns true if the migration finishes
   # @raise [Error] Raises Lhm::Error in case of a error and aborts the migration
   def change_table(table_name, options = {}, &block)
+    ## log
+    logger.info("Using new LHM branch binlog-retries-with-logs")
     with_flags(options) do
       origin = Table.parse(table_name, connection)
       invoker = Invoker.new(origin, connection)
