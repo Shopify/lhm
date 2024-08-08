@@ -6,7 +6,7 @@ $:.unshift(lib) unless $:.include?(lib)
 require 'lhm/version'
 
 Gem::Specification.new do |s|
-  s.name          = 'lhm-shopify'
+  s.name          = 'lhm-shopify-staging'
   s.version       = Lhm::VERSION
   s.licenses      = ['BSD-3-Clause']
   s.platform      = Gem::Platform::RUBY

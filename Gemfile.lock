@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    lhm-shopify (4.2.3)
+    lhm-shopify-staging (4.2.3)
       retriable (>= 3.0.0)
 
 GEM
@@ -70,7 +70,7 @@ DEPENDENCIES
   after_do
   appraisal
   byebug
-  lhm-shopify!
+  lhm-shopify-staging!
   minitest
   mocha
   mysql2
