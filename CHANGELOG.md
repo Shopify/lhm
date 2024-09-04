@@ -1,5 +1,8 @@
 # Unreleased
 
+# 4.4.2 (Sep, 2024)
+* Allow caller to set the algorithm that will be used for DDL ALTER TABLE operations
+
 # 4.4.1 (Aug, 2024)
 * Extend max_binlog_cache_size exceeded error handling to all throttlers
 
