@@ -101,11 +101,27 @@ describe Lhm::Migrator do
       ])
     end
 
+    it 'should add a column using the passed algorithm' do
+      @creator.add_column('logins', 'INT(12)', algorithm: 'COPY')
+
+      value(@creator.statements).must_equal([
+        'alter table `lhmn_alt` add column `logins` INT(12), ALGORITHM=COPY'
+      ])
+    end
+
     it 'should remove a column' do
       @creator.remove_column('logins')
 
       value(@creator.statements).must_equal([
         'alter table `lhmn_alt` drop `logins`, ALGORITHM=INPLACE'
+      ])
+    end
+
+    it 'should remove a column using the passed algorithm' do
+      @creator.remove_column('logins', algorithm: 'COPY')
+
+      value(@creator.statements).must_equal([
+        'alter table `lhmn_alt` drop `logins`, ALGORITHM=COPY'
       ])
     end
 
@@ -155,6 +171,20 @@ describe Lhm::Migrator do
 
       value(@creator.statements[1])
         .must_equal('alter table `lhmn_alt` add column `last` VARCHAR(64), ALGORITHM=INPLACE')
+    end
+  end
+
+  describe 'multiple changes using the passed algorithm' do
+    it 'should add two columns' do
+      @creator.add_column('first', 'VARCHAR(64)', algorithm: 'COPY')
+      @creator.add_column('last', 'VARCHAR(64)', algorithm: 'COPY')
+      value(@creator.statements.length).must_equal(2)
+
+      value(@creator.statements[0])
+        .must_equal('alter table `lhmn_alt` add column `first` VARCHAR(64), ALGORITHM=COPY')
+
+      value(@creator.statements[1])
+        .must_equal('alter table `lhmn_alt` add column `last` VARCHAR(64), ALGORITHM=COPY')
     end
   end
 end

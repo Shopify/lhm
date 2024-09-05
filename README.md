@@ -340,7 +340,7 @@ open coverage/index.html
 ```
 
 ### Merging for a new version
-When creating a PR for a new version, make sure that th version has been bumped in `lib/lhm/version.rb`. Then run the following code snippet to ensure the everything is consistent, otherwise
+When creating a PR for a new version, make sure that the version has been bumped in `lib/lhm/version.rb`. Then run the following code snippet to ensure the everything is consistent, otherwise
 the gem will not publish.
 ```bash
 bundle install

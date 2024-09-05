@@ -32,14 +32,16 @@ module Lhm
     #   end
     #
     # @param [String] statement SQL alter statement
+    # @param [String] algorithm Algorithm that will be used in the DDL operation
     # @note
     #
     #   Don't write the table name directly into the statement. Use the #name
     #   getter instead, because the alter statement will be executed against a
     #   temporary table.
     #
-    def ddl(statement)
-      statements << statement
+    def ddl(statement, algorithm: nil)
+      full_statement = algorithm ? "#{statement}, ALGORITHM=#{algorithm}" : statement
+      statements << full_statement
     end
 
     # Add a column to a table
@@ -52,8 +54,9 @@ module Lhm
     #
     # @param [String] name Name of the column to add
     # @param [String] definition Valid SQL column definition
-    def add_column(name, definition)
-      ddl('alter table `%s` add column `%s` %s, ALGORITHM=INPLACE' % [@name, name, definition])
+    # @param [String] algorithm Algorithm that will be used in the DDL operation
+    def add_column(name, definition, algorithm: 'INPLACE')
+      ddl('alter table `%s` add column `%s` %s' % [@name, name, definition], algorithm:)
     end
 
     # Change an existing column to a new definition
@@ -84,7 +87,8 @@ module Lhm
     #
     # @param [String] old Name of the column to change
     # @param [String] nu New name to use for the column
-    def rename_column(old, nu)
+    # @param [String] algorithm Algorithm that will be used in the DDL operation
+    def rename_column(old, nu, algorithm: 'INPLACE')
       col = @origin.columns[old.to_s]
 
       definition = col[:type]
@@ -94,7 +98,7 @@ module Lhm
       definition += " COMMENT #{@connection.quote(col[:comment])}" if col[:comment]
       definition += " COLLATE #{@connection.quote(col[:collate])}" if col[:collate]
 
-      ddl('alter table `%s` change column `%s` `%s` %s, ALGORITHM=INPLACE' % [@name, old, nu, definition])
+      ddl('alter table `%s` change column `%s` `%s` %s' % [@name, old, nu, definition], algorithm:)
       @renames[old.to_s] = nu.to_s
     end
 
@@ -107,8 +111,9 @@ module Lhm
     #   end
     #
     # @param [String] name Name of the column to delete
-    def remove_column(name)
-      ddl('alter table `%s` drop `%s`, ALGORITHM=INPLACE' % [@name, name])
+    # @param [String] algorithm Algorithm that will be used in the DDL operation
+    def remove_column(name, algorithm: 'INPLACE')
+      ddl('alter table `%s` drop `%s`' % [@name, name], algorithm:)
     end
 
     # Add an index to a table
