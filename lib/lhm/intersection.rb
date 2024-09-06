@@ -4,10 +4,11 @@
 module Lhm
   #  Determine and format columns common to origin and destination.
   class Intersection
-    def initialize(origin, destination, renames = {})
+    def initialize(origin, destination, renames = {}, generated_column_names = [])
       @origin = origin
       @destination = destination
       @renames = renames
+      @generated_column_names = generated_column_names
     end
 
     def origin
@@ -21,7 +22,7 @@ module Lhm
     private
 
     def common
-      (@origin.columns.keys & @destination.columns.keys).sort
+      ((@origin.columns.keys & @destination.columns.keys) - @generated_column_names).sort
     end
 
     module Joiners
