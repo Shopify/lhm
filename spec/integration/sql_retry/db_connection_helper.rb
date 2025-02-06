@@ -20,7 +20,7 @@ class DBConnectionHelper
         :database => test_db_name,
         :port => db_config[key]['port']
       )
-      conn = conn.connection
+      conn = conn.respond_to?(:lease_connection) ? conn.lease_connection : conn.connection
       init_with_dummy_data(conn) if with_data
       conn
     end

@@ -3,13 +3,12 @@ appraise "activerecord-6.1" do
   gem "activerecord-trilogy-adapter"
 end
 
-appraise "activerecord-7.0" do
-  gem "activerecord", "7.0.8"
-  gem "activerecord-trilogy-adapter"
+appraise "activerecord-7.2" do
+  gem "activerecord", "7.2.2.1"
 end
 
-appraise "activerecord-7.1" do
-  gem "activerecord", "7.1.1"
+appraise "activerecord-8.0" do
+  gem "activerecord", "8.0.1"
 end
 
 appraise "activerecord-head" do
