@@ -21,9 +21,11 @@ module Lhm
 
     attr_reader :migrator, :connection
 
-    def initialize(origin, connection)
+    def initialize(origin, connection, options = {})
       @connection = connection
-      @migrator = Migrator.new(origin, connection)
+      @migrator = Migrator.new(origin, connection, options)
+      @options = options
+      normalize_options(@options)
     end
 
     def set_session_lock_wait_timeouts
@@ -45,17 +47,16 @@ module Lhm
       end
     end
 
-    def run(options = {})
-      normalize_options(options)
+    def run
       set_session_lock_wait_timeouts
       migration = @migrator.run
       entangler = Entangler.new(migration, @connection)
 
       entangler.run do
-        options[:verifier] ||= Proc.new { |conn| triggers_still_exist?(conn, entangler) }
-        Chunker.new(migration, @connection, options).run
+        @options[:verifier] ||= Proc.new { |conn| triggers_still_exist?(conn, entangler) }
+        Chunker.new(migration, @connection, @options).run
         raise "Required triggers do not exist" unless triggers_still_exist?(@connection, entangler)
-        if options[:atomic_switch]
+        if @options[:atomic_switch]
           AtomicSwitcher.new(migration, @connection).run
         else
           LockedSwitcher.new(migration, @connection).run

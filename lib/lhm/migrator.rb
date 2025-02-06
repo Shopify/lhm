@@ -15,12 +15,13 @@ module Lhm
 
     attr_reader :name, :statements, :connection, :conditions, :renames, :origin
 
-    def initialize(table, connection = nil)
+    def initialize(table, connection = nil, options = {})
       @connection = connection
       @origin = table
       @name = table.destination_name
       @statements = []
       @renames = {}
+      @options = options
     end
 
     # Alter a table with a custom statement
@@ -222,6 +223,11 @@ module Lhm
       original    = %{CREATE TABLE `#{ @origin.name }`}
       replacement = %{CREATE TABLE `#{ @origin.destination_name }`}
       stmt = @origin.ddl.gsub(original, replacement)
+
+      if @options[:force_default_engine]
+        stmt = stmt.sub(/ENGINE=\w+\s/, "")
+      end
+
       @connection.execute(tagged(stmt))
 
       Lhm.logger.info("Created destination table #{@origin.destination_name}")
