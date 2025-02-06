@@ -81,10 +81,12 @@ describe Lhm::SqlRetry do
     logs = @logger.string.split("\n")
     assert_equal 2, logs.length
 
-    assert logs.first.include?("Lock wait timeout exceeded; try restarting transaction' - 1 tries")
+    assert logs.first.include?("Lock wait timeout exceeded; try restarting transaction")
+    assert logs.first.include?("- 1 tries")
     assert logs.first.include?("0.2 seconds until the next try")
 
-    assert logs.last.include?("Lock wait timeout exceeded; try restarting transaction' - 2 tries")
+    assert logs.last.include?("Lock wait timeout exceeded; try restarting transaction")
+    assert logs.last.include?("- 2 tries")
     assert logs.last.include?("0.2 seconds until the next try")
   end
 

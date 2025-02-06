@@ -616,7 +616,13 @@ describe Lhm do
         table_create(:users)
         100.times { |n| execute("insert into users set reference = '#{ n }'") }
 
-        assert_raises ActiveRecord::StatementInvalid do
+        error = if ActiveRecord.version >= ::Gem::Version.new('8.1.0.alpha')
+          ActiveRecord::ConnectionNotEstablished
+        else
+          ActiveRecord::StatementInvalid
+        end
+
+        assert_raises error do
           Toxiproxy[:mysql_master].down do
             Lhm.change_table(:users, :atomic_switch => false) do |t|
               t.ddl("ALTER TABLE #{t.name} CHANGE id id bigint (20) NOT NULL")

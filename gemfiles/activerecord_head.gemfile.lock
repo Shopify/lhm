@@ -1,16 +1,17 @@
 GIT
   remote: https://github.com/rails/rails.git
-  revision: f4a9b7618fc32f0d3b2c0ff03a3f34f4964cc553
+  revision: bdad2707835949a96dd29e747b8c324593efd4d8
   branch: main
   specs:
-    activemodel (8.0.0.alpha)
-      activesupport (= 8.0.0.alpha)
-    activerecord (8.0.0.alpha)
-      activemodel (= 8.0.0.alpha)
-      activesupport (= 8.0.0.alpha)
+    activemodel (8.1.0.alpha)
+      activesupport (= 8.1.0.alpha)
+    activerecord (8.1.0.alpha)
+      activemodel (= 8.1.0.alpha)
+      activesupport (= 8.1.0.alpha)
       timeout (>= 0.4.0)
-    activesupport (8.0.0.alpha)
+    activesupport (8.1.0.alpha)
       base64
+      benchmark (>= 0.3)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.3.1)
       connection_pool (>= 2.2.5)
@@ -20,6 +21,7 @@ GIT
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
 
 PATH
   remote: ..
@@ -36,38 +38,42 @@ GEM
       rake
       thor (>= 0.14.0)
     base64 (0.2.0)
-    bigdecimal (3.1.8)
+    benchmark (0.4.0)
+    bigdecimal (3.1.9)
     byebug (11.1.3)
-    concurrent-ruby (1.3.3)
-    connection_pool (2.4.1)
+    concurrent-ruby (1.3.5)
+    connection_pool (2.5.0)
     docile (1.4.1)
     drb (2.2.1)
-    i18n (1.14.5)
+    i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    logger (1.6.0)
-    minitest (5.24.1)
+    logger (1.6.5)
+    minitest (5.25.4)
     mocha (2.4.5)
       ruby2_keywords (>= 0.0.5)
     mysql2 (0.5.6)
+    ostruct (0.6.1)
     rake (13.2.1)
     retriable (3.1.2)
     ruby2_keywords (0.0.5)
-    securerandom (0.3.1)
+    securerandom (0.4.1)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    thor (1.3.1)
-    timeout (0.4.1)
+    thor (1.3.2)
+    timeout (0.4.3)
     toxiproxy (2.0.2)
-    trilogy (2.8.1)
+    trilogy (2.9.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    uri (1.0.2)
 
 PLATFORMS
   arm64-darwin-22
+  arm64-darwin-23
   x86_64-linux
 
 DEPENDENCIES
@@ -76,13 +82,15 @@ DEPENDENCIES
   appraisal
   byebug
   lhm-shopify!
+  logger
   minitest
   mocha
   mysql2
+  ostruct
   rake
   simplecov
   toxiproxy
   trilogy
 
 BUNDLED WITH
-   2.2.22
+   2.6.3

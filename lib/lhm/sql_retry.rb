@@ -199,6 +199,7 @@ module Lhm
           /The MySQL server is running with the --read-only option so it cannot execute this statement/,
         ],
         Trilogy::ConnectionError => nil,
+        Trilogy::TimeoutError => nil,
       }
 
       if ActiveRecord::VERSION::STRING >= "7.1"

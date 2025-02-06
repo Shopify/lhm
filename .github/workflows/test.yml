@@ -15,17 +15,19 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        activerecord: ["6.1", "7.0", "7.1", "head"]
+        activerecord: ["6.1", "7.2", "8.0", "head"]
         ruby: ["3.1", "3.2", "3.3", "head"]
         mysql: ["5.7", "8.0"]
         adapter: ["mysql2", "trilogy"]
         exclude:
           - activerecord: 6.1
             ruby: head
-          - activerecord: 7.0
+          - activerecord: 7.2
             ruby: head
+          - activerecord: 8.0
+            ruby: 3.1
           - activerecord: head
-            ruby: 3.0
+            ruby: 3.1
 
     env:
       BUNDLE_GEMFILE: "${{ github.workspace }}/gemfiles/activerecord_${{ matrix.activerecord }}.gemfile"
