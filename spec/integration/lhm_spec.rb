@@ -574,6 +574,18 @@ describe Lhm do
       value(engine).must_equal("InnoDB")
     end
 
+    it "should not fail using the default algorithms when changing tables with fulltext indexes" do
+      table_create(:users)
+      execute("DROP INDEX `index_with_a_custom_name` ON `users`")
+      execute("CREATE FULLTEXT INDEX `index_with_a_custom_name` ON `users` (`username`, `group`)")
+
+      Lhm.change_table(:users) do |t|
+        t.add_column(:email, "VARCHAR(255)")
+      end
+
+      value(table_read(:users).columns).must_include("email")
+    end
+
     describe 'parallel' do
       it 'should perserve inserts during migration' do
         50.times { |n| execute("insert into users set reference = '#{ n }'") }

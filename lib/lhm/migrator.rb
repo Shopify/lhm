@@ -56,7 +56,7 @@ module Lhm
     # @param [String] name Name of the column to add
     # @param [String] definition Valid SQL column definition
     # @param [String] algorithm Algorithm that will be used in the DDL operation
-    def add_column(name, definition, algorithm: 'INPLACE')
+    def add_column(name, definition, algorithm: 'COPY')
       ddl('alter table `%s` add column `%s` %s' % [@name, name, definition], algorithm:)
     end
 
@@ -89,7 +89,7 @@ module Lhm
     # @param [String] old Name of the column to change
     # @param [String] nu New name to use for the column
     # @param [String] algorithm Algorithm that will be used in the DDL operation
-    def rename_column(old, nu, algorithm: 'INPLACE')
+    def rename_column(old, nu, algorithm: 'COPY')
       col = @origin.columns[old.to_s]
 
       definition = col[:type]
@@ -113,7 +113,7 @@ module Lhm
     #
     # @param [String] name Name of the column to delete
     # @param [String] algorithm Algorithm that will be used in the DDL operation
-    def remove_column(name, algorithm: 'INPLACE')
+    def remove_column(name, algorithm: 'COPY')
       ddl('alter table `%s` drop `%s`' % [@name, name], algorithm:)
     end
 
