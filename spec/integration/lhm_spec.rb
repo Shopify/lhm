@@ -553,6 +553,27 @@ describe Lhm do
       end
     end
 
+    it 'creates the shadow table with the default engine when the `force_default_engine` option is used' do
+      table_create(:myisam_users)
+
+      engine = select_value("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_NAME = 'myisam_users'")
+      value(engine).must_equal("MyISAM")
+
+      Lhm.change_table(:myisam_users) do |t|
+        t.add_column(:logins, "INT(12) DEFAULT '0'", algorithm: "COPY")
+      end
+
+      engine = select_value("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_NAME = 'myisam_users'")
+      value(engine).must_equal("MyISAM")
+
+      Lhm.change_table(:myisam_users, force_default_engine: true) do |t|
+        t.remove_column(:logins)
+      end
+
+      engine = select_value("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_NAME = 'myisam_users'")
+      value(engine).must_equal("InnoDB")
+    end
+
     describe 'parallel' do
       it 'should perserve inserts during migration' do
         50.times { |n| execute("insert into users set reference = '#{ n }'") }

@@ -54,9 +54,9 @@ module Lhm
   def change_table(table_name, options = {}, &block)
     with_flags(options) do
       origin = Table.parse(table_name, connection)
-      invoker = Invoker.new(origin, connection)
+      invoker = Invoker.new(origin, connection, options)
       block.call(invoker.migrator)
-      invoker.run(options)
+      invoker.run
       true
     end
   end
