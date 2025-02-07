@@ -66,11 +66,7 @@ describe Lhm::Throttler::Replica do
     describe 'with active record config' do
       it 'logs and creates client' do
         active_record_config = { username: 'user', password: 'pw', database: 'db' }
-        if ActiveRecord::VERSION::MAJOR > 6 || ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1
-          ActiveRecord::Base.stubs(:connection_pool).returns(stub(db_config: stub(configuration_hash: active_record_config)))
-        else
-          ActiveRecord::Base.stubs(:connection_pool).returns(stub(spec: stub(config: active_record_config)))
-        end
+        ActiveRecord::Base.stubs(:connection_pool).returns(stub(db_config: stub(configuration_hash: active_record_config)))
 
         DATABASE.client.stubs(:new).returns(mock())
 
