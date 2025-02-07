@@ -134,7 +134,7 @@ module Lhm
             raise ArgumentError, "Expected #{config_proc.inspect} to respond to `call`"
           end
         else
-          db_config
+          ActiveRecord::Base.connection_pool.db_config.configuration_hash.dup
         end
         config.deep_symbolize_keys!
         config[:host] = @host
@@ -146,23 +146,6 @@ module Lhm
       rescue self.class.client_error => e
         Lhm.logger.info "Unable to connect and/or query #{host}: #{e}"
         [nil]
-      end
-
-      private
-
-      def db_config
-        if ar_supports_db_config?
-          ActiveRecord::Base.connection_pool.db_config.configuration_hash.dup
-        else
-          ActiveRecord::Base.connection_pool.spec.config.dup
-        end
-      end
-
-      def ar_supports_db_config?
-        # https://api.rubyonrails.org/v6.0/classes/ActiveRecord/ConnectionAdapters/ConnectionPool.html <-- has spec
-        # vs
-        # https://api.rubyonrails.org/v6.1/classes/ActiveRecord/ConnectionAdapters/ConnectionPool.html <-- has db_config
-        ActiveRecord::VERSION::MAJOR > 6 || ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR >= 1
       end
     end
   end
