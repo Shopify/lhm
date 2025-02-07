@@ -568,7 +568,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
 
         # generated column remains intact
@@ -577,7 +577,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
       end
 
