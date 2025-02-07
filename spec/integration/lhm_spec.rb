@@ -561,14 +561,14 @@ describe Lhm do
         t.add_column(:sample_additional_column, "VARCHAR(255)")
       end
 
-      slave do
+      replica do
         # new column is added
         value(table_read(:users).columns['sample_additional_column']).must_equal({
           :type => 'varchar(255)',
           :is_nullable => 'YES',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
 
         # generated column remains intact
@@ -577,7 +577,7 @@ describe Lhm do
           :is_nullable => 'YES',
           :column_default => nil,
           :comment => '',
-          :collate => 'utf8_general_ci',
+          :collate => collation,
         })
       end
 
