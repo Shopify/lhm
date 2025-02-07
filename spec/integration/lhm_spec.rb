@@ -561,7 +561,7 @@ describe Lhm do
         t.add_column(:sample_additional_column, "VARCHAR(255)")
       end
 
-      slave do
+      replica do
         # new column is added
         value(table_read(:users).columns['sample_additional_column']).must_equal({
           :type => 'varchar(255)',

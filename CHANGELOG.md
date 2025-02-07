@@ -1,5 +1,12 @@
 # Unreleased
 
+# 4.5.0 (Feb, 2025)
+* Update test matrix to include Rails 8
+* Add option to force tables to use default engine
+* Change default algorithm for add/rename/remove column operations
+* Drop support for ActiveRecord version 6.1, as it has reached EOL
+* Add support for tables with generated columns
+
 # 4.4.2 (Sep, 2024)
 * Allow caller to set the algorithm that will be used for DDL ALTER TABLE operations
 
