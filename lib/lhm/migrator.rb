@@ -216,7 +216,11 @@ module Lhm
       @statements.each do |stmt|
         @connection.execute(tagged(stmt))
       end
-      Migration.new(@origin, destination_read, conditions, renames)
+      Migration.new(@origin, destination_read, conditions, renames, Time.now, generated_column_names)
+    end
+
+    def generated_column_names
+      @connection.columns(@origin.name).select(&:virtual?).map(&:name)
     end
 
     def destination_create
