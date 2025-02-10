@@ -1,7 +1,7 @@
 name: lhm
 up:
   - packages:
-      - mysql-client@5.7
+      - mysql-client
       - wget
   - ruby
   - bundler
@@ -12,8 +12,9 @@ up:
       meet: ":"
   - custom:
       name: Podman compose
-      met?: podman-compose ps | grep -ioE -q "lhm.*running\(4\)"
-      meet: podman-compose up -d
+      met?: "[[ $(podman-compose ps | grep -c -e 'running' -e 'Up') == 4 ]] 2> /dev/null"
+      meet: podman-compose -f docker-compose-mysql-8.0.yml up -d
+      down: podman-compose down
   - custom:
       name: Waiting for DBs to be operational
       met?: ./scripts/helpers/wait-for-dbs.sh
