@@ -1,4 +1,5 @@
 # Unreleased
+* Create update before insert trigger
 
 # 4.5.0 (Feb, 2025)
 * Update test matrix to include Rails 8
