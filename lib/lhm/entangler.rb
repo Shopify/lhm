@@ -27,8 +27,8 @@ module Lhm
     def entangle
       [
         create_delete_trigger,
+        create_update_trigger,
         create_insert_trigger,
-        create_update_trigger
       ]
     end
 

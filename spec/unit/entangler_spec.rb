@@ -27,29 +27,7 @@ describe Lhm::Entangler do
       @destination.columns['tags'] = { :type => 'varchar(255)' }
     end
 
-    it 'should create insert trigger to destination table' do
-      ddl = %Q{
-        create trigger `lhmt_ins_origin`
-        after insert on `origin` for each row
-        replace into `destination` (`info`, `tags`) /* large hadron migration */
-        values (`NEW`.`info`, `NEW`.`tags`)
-      }
-
-      value(@entangler.entangle).must_include strip(ddl)
-    end
-
-    it 'should create an update trigger to the destination table' do
-      ddl = %Q{
-        create trigger `lhmt_upd_origin`
-        after update on `origin` for each row
-        replace into `destination` (`info`, `tags`) /* large hadron migration */
-        values (`NEW`.`info`, `NEW`.`tags`)
-      }
-
-      value(@entangler.entangle).must_include strip(ddl)
-    end
-
-    it 'should create a delete trigger to the destination table' do
+    it 'should create the delete trigger to the destination table first' do
       ddl = %Q{
         create trigger `lhmt_del_origin`
         after delete on `origin` for each row
@@ -57,7 +35,29 @@ describe Lhm::Entangler do
         where `destination`.`id` = OLD.`id`
       }
 
-      value(@entangler.entangle).must_include strip(ddl)
+      assert_equal strip(ddl), @entangler.entangle[0]
+    end
+
+    it 'should create the update trigger to the destination table second' do
+      ddl = %Q{
+        create trigger `lhmt_upd_origin`
+        after update on `origin` for each row
+        replace into `destination` (`info`, `tags`) /* large hadron migration */
+        values (`NEW`.`info`, `NEW`.`tags`)
+      }
+
+      assert_equal strip(ddl), @entangler.entangle[1]
+    end
+
+    it 'should create the insert trigger to destination table last' do
+      ddl = %Q{
+        create trigger `lhmt_ins_origin`
+        after insert on `origin` for each row
+        replace into `destination` (`info`, `tags`) /* large hadron migration */
+        values (`NEW`.`info`, `NEW`.`tags`)
+      }
+
+      assert_equal strip(ddl), @entangler.entangle[2]
     end
 
     it 'should retry trigger creation when it hits a lock wait timeout' do

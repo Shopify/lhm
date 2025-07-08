@@ -1,5 +1,8 @@
 # Unreleased
 
+# 4.5.1 (Jul, 2025)
+* Create update before insert trigger
+
 # 4.5.0 (Feb, 2025)
 * Update test matrix to include Rails 8
 * Add option to force tables to use default engine
