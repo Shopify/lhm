@@ -109,6 +109,11 @@ end
 to prevent accidental data loss. After successful or failed LHM migrations, these leftover
 tables must be cleaned up.
 
+**Note:** When developing locally or running tests, LHM runs 'inline' by default, meaning that the
+extra table is not used and the original table is not replaced. If this behavior is not desirable
+for your project, you can disable it by setting `Lhm.disallow_inline!` in the appropriate
+environment file or initializer.
+
 ### Usage with ProxySQL
 LHM can recover from connection loss. However, when used in conjunction with ProxySQL, there are multiple ways that
 connection loss could induce data loss (if triggered by a failover). Therefore  it will perform additional checks to
