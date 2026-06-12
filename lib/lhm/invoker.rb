@@ -65,7 +65,11 @@ module Lhm
     end
 
     def triggers_still_exist?(conn, entangler)
-      triggers = conn.select_values("SHOW TRIGGERS LIKE '%#{migrator.origin.name}'").select { |name| name =~ /^lhmt/ }
+      triggers = conn.select_values(
+        "SHOW TRIGGERS LIKE '%#{migrator.origin.name}'",
+        should_retry: true,
+        log_prefix: "Invoker"
+      ).select { |name| name =~ /^lhmt/ }
       triggers.sort == entangler.expected_triggers.sort
     end
 

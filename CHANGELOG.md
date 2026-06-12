@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.5.2 (Jun, 2026)
+* Use concrete Trilogy connection exception classes in retry configuration.
+* Use a retriable-compatible effectively unbounded max elapsed time value.
+
 # 4.5.1 (Jul, 2025)
 * Create update before insert trigger
 

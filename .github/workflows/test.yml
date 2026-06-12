@@ -26,8 +26,12 @@ jobs:
             ruby: head
           - activerecord: 8.0
             ruby: 3.1
+          - activerecord: 8.0
+            ruby: head
           - activerecord: head
             ruby: 3.1
+          - activerecord: head
+            ruby: head
 
     env:
       BUNDLE_GEMFILE: "${{ github.workspace }}/gemfiles/activerecord_${{ matrix.activerecord }}.gemfile"

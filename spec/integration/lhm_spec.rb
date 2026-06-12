@@ -646,11 +646,13 @@ describe Lhm do
         50.times { |n| execute("insert into users set reference = '#{ n }'") }
 
         insert = Thread.new do
+          connection = new_mysql_connection
           10.times do |n|
-            connect_master!
-            execute("insert into users set reference = '#{ 100 + n }'")
+            connection.query("insert into users set reference = '#{ 100 + n }'")
             sleep(0.17)
           end
+        ensure
+          connection&.close
         end
         sleep 2
 
@@ -670,10 +672,13 @@ describe Lhm do
         50.times { |n| execute("insert into users set reference = '#{ n }'") }
 
         delete = Thread.new do
+          connection = new_mysql_connection
           10.times do |n|
-            execute("delete from users where reference = '#{ n }'")
+            connection.query("delete from users where reference = '#{ n }'")
             sleep(0.17)
           end
+        ensure
+          connection&.close
         end
         sleep 2
 

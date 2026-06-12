@@ -158,7 +158,7 @@ module Lhm
         base_interval: 1, # the initial interval in seconds between tries.
         tries: 20, # Number of attempts to make at running your code block (includes initial attempt).
         rand_factor: 0, # percentage to randomize the next retry interval time
-        max_elapsed_time: Float::INFINITY, # max total time in seconds that code is allowed to keep being retried
+        max_elapsed_time: Float::MAX, # max total time in seconds that code is allowed to keep being retried
         on_retry: Proc.new do |exception, try_number, total_elapsed_time, next_interval|
           log_with_prefix("#{exception.class}: '#{exception.message}' - #{try_number} tries in #{total_elapsed_time} seconds and #{next_interval} seconds until the next try.", :error)
         end
@@ -198,15 +198,27 @@ module Lhm
           /connection is locked to hostgroup/,
           /The MySQL server is running with the --read-only option so it cannot execute this statement/,
         ],
-        Trilogy::ConnectionError => nil,
-        Trilogy::TimeoutError => nil,
       }
+
+      retriable_trilogy_connection_error_classes.each do |error_class|
+        errors[error_class] = nil
+      end
 
       if ActiveRecord::VERSION::STRING >= "7.1"
         errors[ActiveRecord::ConnectionFailed] = nil
       end
 
       errors
+    end
+
+    def retriable_trilogy_connection_error_classes
+      errors = []
+      errors << Trilogy::BaseConnectionError if defined?(Trilogy::BaseConnectionError)
+      errors << Trilogy::SSLError if defined?(Trilogy::SSLError)
+      errors << Trilogy::ConnectionClosed if defined?(Trilogy::ConnectionClosed)
+      errors.concat(Trilogy::SyscallError::ERRORS.values) if defined?(Trilogy::SyscallError::ERRORS)
+
+      errors.uniq.select { |error_class| error_class.is_a?(Class) && error_class <= Exception }
     end
   end
 end
