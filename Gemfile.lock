@@ -7,13 +7,13 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (8.0.1)
-      activesupport (= 8.0.1)
-    activerecord (8.0.1)
-      activemodel (= 8.0.1)
-      activesupport (= 8.0.1)
+    activemodel (8.0.5.2)
+      activesupport (= 8.0.5.2)
+    activerecord (8.0.5.2)
+      activemodel (= 8.0.5.2)
+      activesupport (= 8.0.5.2)
       timeout (>= 0.4.0)
-    activesupport (8.0.1)
+    activesupport (8.0.5.2)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -35,7 +35,7 @@ GEM
     benchmark (0.4.0)
     bigdecimal (3.1.9)
     byebug (11.1.3)
-    concurrent-ruby (1.3.5)
+    concurrent-ruby (1.3.8)
     connection_pool (2.5.0)
     docile (1.4.1)
     drb (2.2.1)
@@ -60,10 +60,11 @@ GEM
     thor (1.3.2)
     timeout (0.4.3)
     toxiproxy (2.0.2)
-    trilogy (2.8.1)
+    trilogy (2.13.3)
+      bigdecimal
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    uri (1.0.2)
+    uri (1.1.2)
 
 PLATFORMS
   arm64-darwin-21
