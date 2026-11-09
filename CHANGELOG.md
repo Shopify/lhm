@@ -1,4 +1,9 @@
 # Unreleased
+* Update development/test dependencies to address security advisories:
+  * activerecord/activesupport 8.0.1 → 8.0.5.2 / 7.2.2.1 → 7.2.4 (CVE-2025-55193, CVE-2026-33169, CVE-2026-33170, CVE-2026-33176, GHSA-8474-xrp6-wh69)
+  * concurrent-ruby 1.3.5 → 1.3.8 (CVE-2026-54904, CVE-2026-54905, CVE-2026-54906)
+  * trilogy 2.8.1/2.9.0 → 2.13.3 (GHSA-744p-w4gc-m3gh)
+  * uri 1.0.2 → 1.1.2 (CVE-2025-27221, CVE-2025-61594)
 
 # 4.5.1 (Jul, 2025)
 * Create update before insert trigger
