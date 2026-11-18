@@ -26,7 +26,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'retriable', '>= 3.0.0'
 
   s.add_development_dependency 'activerecord'
-  s.add_development_dependency 'minitest'
+  # minitest 6 depends on prism, whose native gems need Ruby >= 3.3 and < head; 5.27 covers Ruby 3.1 through 4.x
+  s.add_development_dependency 'minitest', '~> 5.27'
   s.add_development_dependency 'mocha'
   s.add_development_dependency 'after_do'
   s.add_development_dependency 'rake'

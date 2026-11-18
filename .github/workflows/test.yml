@@ -37,13 +37,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # Native gem extensions (mysql2, trilogy) are built during bundler-cache, so headers must exist first
+      - name: Install Ubuntu packages
+        run: sudo apt-get update && sudo apt-get install numactl libaio-dev libmysqlclient-dev libssl-dev
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
-
-      - name: Install Ubuntu packages
-        run: sudo apt-get update && sudo apt-get install numactl libaio-dev libmysqlclient-dev
 
       - name: Setup MySQL and ProxySQL (docker-compose)
         # Might have to change to docker compose up -d (i.e. Compose V2) when the Ubuntu image changes the docker-compose version

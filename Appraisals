@@ -6,6 +6,10 @@ appraise "activerecord-8.0" do
   gem "activerecord", "8.0.1"
 end
 
+appraise "activerecord-8.1" do
+  gem "activerecord", "8.1.4.1"
+end
+
 appraise "activerecord-head" do
   gem "activerecord", git: "https://github.com/rails/rails.git", branch: "main"
 end
