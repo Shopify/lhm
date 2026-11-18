@@ -669,10 +669,14 @@ describe Lhm do
       it 'should perserve deletes during migration' do
         50.times { |n| execute("insert into users set reference = '#{ n }'") }
 
+        # Use a separate pooled connection: sharing @connection with the migration interleaves
+        # protocol packets on one socket if this thread outlives the sleep below.
         delete = Thread.new do
-          10.times do |n|
-            execute("delete from users where reference = '#{ n }'")
-            sleep(0.17)
+          ActiveRecord::Base.connection_pool.with_connection do |conn|
+            10.times do |n|
+              conn.execute("delete from users where reference = '#{ n }'")
+              sleep(0.17)
+            end
           end
         end
         sleep 2
@@ -729,17 +733,19 @@ describe Lhm do
         table_create(:users)
         100.times { |n| execute("insert into users set reference = '#{ n }'") }
 
-        # Redeclare Lhm::ChunkInsert to use Hook to disable MySQL writer for 3 seconds before first insert
+        # Redeclare Lhm::ChunkInsert to use Hook to disable MySQL writer for 3 seconds before first insert.
+        # The proxy is disabled synchronously so the insert always hits the outage; disabling it from the
+        # background thread races with the insert and can push the outage onto non-retried queries.
         Lhm::ChunkInsert.class_eval do
           extend AfterDo
 
           before(:insert_and_return_count_of_rows_created) do
             unless mysql_disabled
               mysql_disabled = true
+              Toxiproxy[:mysql_master].disable
               Thread.new do
-                Toxiproxy[:mysql_master].down do
-                  sleep 3
-                end
+                sleep 3
+                Toxiproxy[:mysql_master].enable
               end
             end
           end
