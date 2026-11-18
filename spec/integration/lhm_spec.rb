@@ -729,17 +729,19 @@ describe Lhm do
         table_create(:users)
         100.times { |n| execute("insert into users set reference = '#{ n }'") }
 
-        # Redeclare Lhm::ChunkInsert to use Hook to disable MySQL writer for 3 seconds before first insert
+        # Redeclare Lhm::ChunkInsert to use Hook to disable MySQL writer for 3 seconds before first insert.
+        # The proxy is disabled synchronously so the insert always hits the outage; disabling it from the
+        # background thread races with the insert and can push the outage onto non-retried queries.
         Lhm::ChunkInsert.class_eval do
           extend AfterDo
 
           before(:insert_and_return_count_of_rows_created) do
             unless mysql_disabled
               mysql_disabled = true
+              Toxiproxy[:mysql_master].disable
               Thread.new do
-                Toxiproxy[:mysql_master].down do
-                  sleep 3
-                end
+                sleep 3
+                Toxiproxy[:mysql_master].enable
               end
             end
           end
