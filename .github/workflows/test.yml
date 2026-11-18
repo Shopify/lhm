@@ -25,6 +25,9 @@ jobs:
             ruby: head
           - activerecord: 7.2
             ruby: head
+          # activesupport 8.0 passes `quirks_mode:` to JSON.generate, which ruby-head's json rejects
+          - activerecord: 8.0
+            ruby: head
           - activerecord: 8.0
             ruby: 3.1
           - activerecord: 8.1

@@ -669,10 +669,14 @@ describe Lhm do
       it 'should perserve deletes during migration' do
         50.times { |n| execute("insert into users set reference = '#{ n }'") }
 
+        # Use a separate pooled connection: sharing @connection with the migration interleaves
+        # protocol packets on one socket if this thread outlives the sleep below.
         delete = Thread.new do
-          10.times do |n|
-            execute("delete from users where reference = '#{ n }'")
-            sleep(0.17)
+          ActiveRecord::Base.connection_pool.with_connection do |conn|
+            10.times do |n|
+              conn.execute("delete from users where reference = '#{ n }'")
+              sleep(0.17)
+            end
           end
         end
         sleep 2
