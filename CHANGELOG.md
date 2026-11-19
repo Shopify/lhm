@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.5.2 (Nov, 2026)
+* Update test matrix to include Rails 8.1 and Ruby 3.4, 4.0
+* Update development dependencies
+
 # 4.5.1 (Jul, 2025)
 * Create update before insert trigger
 
