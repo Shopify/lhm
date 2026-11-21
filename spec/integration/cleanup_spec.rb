@@ -115,9 +115,9 @@ describe Lhm, 'cleanup' do
         end
 
         value(output).must_include("The following DDLs would be executed:")
-        value(output).must_include("drop trigger if exists lhmt_ins_permissions")
-        value(output).must_include("drop trigger if exists lhmt_upd_permissions")
-        value(output).must_include("drop trigger if exists lhmt_del_permissions")
+        value(output).must_include("drop trigger if exists `lhmt_ins_permissions`")
+        value(output).must_include("drop trigger if exists `lhmt_upd_permissions`")
+        value(output).must_include("drop trigger if exists `lhmt_del_permissions`")
       end
 
       it 'should show temporary triggers for the specified table only' do
@@ -126,9 +126,9 @@ describe Lhm, 'cleanup' do
           Lhm.cleanup_current_run(false, 'permissions')
         end
         value(output).must_include("The following DDLs would be executed:")
-        value(output).must_include("drop trigger if exists lhmt_ins_permissions")
-        value(output).must_include("drop trigger if exists lhmt_upd_permissions")
-        value(output).must_include("drop trigger if exists lhmt_del_permissions")
+        value(output).must_include("drop trigger if exists `lhmt_ins_permissions`")
+        value(output).must_include("drop trigger if exists `lhmt_upd_permissions`")
+        value(output).must_include("drop trigger if exists `lhmt_del_permissions`")
       end
 
       it 'should delete temporary tables and triggers for the specified table only' do
@@ -143,6 +143,70 @@ describe Lhm, 'cleanup' do
         refute all_triggers.find { |t| t =~ /lhmt_(.*)_permissions/}
         assert all_triggers.find { |t| t =~ /lhmt_(.*)_users/}
       end
+    end
+  end
+
+  describe 'names that need quoting' do
+    before(:each) do
+      table_create(:users)
+      table_create(:permissions)
+    end
+
+    def all_tables
+      Lhm.connection.select_values('show tables')
+    end
+
+    def all_triggers
+      Lhm.connection.select_values('show triggers')
+    end
+
+    it 'drops a leftover table with a comma in its name and no other table' do
+      execute('create table `lhmn_leftover,users` (id int)')
+
+      assert Lhm.cleanup(true)
+
+      assert all_tables.include?('users')
+      refute all_tables.include?('lhmn_leftover,users')
+    end
+
+    it 'drops leftover tables whose names hold spaces, dots and backticks' do
+      execute('create table `lhmn_with space` (id int)')
+      execute('create table `lhma_with.dot` (id int)')
+      execute('create table `lhmn_with``tick` (id int)')
+
+      assert Lhm.cleanup(true)
+
+      value(all_tables.grep(/^lhm/)).must_equal([])
+      assert all_tables.include?('users')
+      assert all_tables.include?('permissions')
+    end
+
+    it 'drops a leftover trigger whose name needs quoting' do
+      execute('create trigger `lhmt_with space` after insert on users for each row set @lhm_spec = 1')
+
+      assert Lhm.cleanup(true)
+
+      refute all_triggers.include?('lhmt_with space')
+      assert all_tables.include?('users')
+    end
+
+    it 'quotes trigger and table names when it cleans up the current run' do
+      table_rename(:permissions, 'lhmn_permissions')
+      table_create(:permissions)
+      execute('create trigger `lhmt_with space_permissions` after insert on permissions for each row set @lhm_spec = 1')
+
+      output = capture_stdout do |logger|
+        Lhm.logger = logger
+        Lhm.cleanup_current_run(false, 'permissions')
+      end
+      value(output).must_include('drop trigger if exists `lhmt_with space_permissions`')
+      value(output).must_include('rename table `lhmn_permissions` to `lhma_')
+
+      assert Lhm.cleanup_current_run(true, 'permissions')
+
+      refute all_triggers.include?('lhmt_with space_permissions')
+      refute all_tables.include?('lhmn_permissions')
+      assert all_tables.include?('permissions')
     end
   end
 end
