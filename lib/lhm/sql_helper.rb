@@ -30,6 +30,12 @@ module Lhm
       "#{ statement } #{ SqlHelper.annotation }"
     end
 
+    # Quotes one MySQL identifier, such as a table or trigger name that
+    # `show tables` or `show triggers` returned. A dot stays part of the name.
+    def quote_identifier(name)
+      "`#{ name.to_s.gsub('`', '``') }`"
+    end
+
     private
 
     def column_definition(cols)

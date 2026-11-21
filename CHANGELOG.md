@@ -1,4 +1,5 @@
 # Unreleased
+* Quote table and trigger names that `Lhm.cleanup` and `Lhm.cleanup_current_run` read from the database before they use them in DDL
 
 # 4.5.2 (Nov, 2026)
 * Update test matrix to include Rails 8.1 and Ruby 3.4, 4.0

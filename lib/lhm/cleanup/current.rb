@@ -1,5 +1,6 @@
 require 'lhm/timestamp'
 require 'lhm/sql_retry'
+require 'lhm/sql_helper'
 
 module Lhm
   module Cleanup
@@ -31,7 +32,7 @@ module Lhm
 
       def build_statements_for_drop_lhm_triggers_for_origin
         lhm_triggers_for_origin.each do |trigger|
-          @ddls << "drop trigger if exists #{trigger}"
+          @ddls << "drop trigger if exists #{SqlHelper.quote_identifier(trigger)}"
         end
       end
 
@@ -47,7 +48,7 @@ module Lhm
 
       def build_statements_for_rename_lhmn_tables_for_origin
         lhmn_tables_for_origin.each do |table|
-          @ddls << "rename table #{table} to #{@table_name.failed}"
+          @ddls << "rename table #{SqlHelper.quote_identifier(table)} to #{SqlHelper.quote_identifier(@table_name.failed)}"
         end
       end
 
