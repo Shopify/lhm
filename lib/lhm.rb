@@ -8,6 +8,7 @@ require 'lhm/throttler'
 require 'lhm/version'
 require 'lhm/cleanup/current'
 require 'lhm/sql_retry'
+require 'lhm/sql_helper'
 require 'lhm/proxysql_helper'
 require 'lhm/connection'
 require 'lhm/test_support'
@@ -121,12 +122,12 @@ module Lhm
   def drop_tables_and_triggers(run = false, triggers, tables)
     if run
       triggers.each do |trigger|
-        connection.execute("drop trigger if exists #{trigger}")
+        connection.execute("drop trigger if exists #{SqlHelper.quote_identifier(trigger)}")
       end
       logger.info("Dropped triggers #{triggers.join(', ')}")
 
       tables.each do |table|
-        connection.execute("drop table if exists #{table}")
+        connection.execute("drop table if exists #{SqlHelper.quote_identifier(table)}")
       end
       logger.info("Dropped tables #{tables.join(', ')}")
 

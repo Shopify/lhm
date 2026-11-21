@@ -25,4 +25,19 @@ describe Lhm::SqlHelper do
     value(Lhm::SqlHelper.idx_spec(['title(10)', 'name (6)', 'album']))
       .must_equal('`title`(10), `name`(6), `album`')
   end
+
+  it 'should quote an identifier' do
+    value(Lhm::SqlHelper.quote_identifier('lhma_2026_01_01_00_00_00_000_users'))
+      .must_equal('`lhma_2026_01_01_00_00_00_000_users`')
+  end
+
+  it 'should keep commas, spaces and dots inside one quoted identifier' do
+    value(Lhm::SqlHelper.quote_identifier('lhmn_a, b.c'))
+      .must_equal('`lhmn_a, b.c`')
+  end
+
+  it 'should escape backticks in an identifier' do
+    value(Lhm::SqlHelper.quote_identifier('lhmn_a`b'))
+      .must_equal('`lhmn_a``b`')
+  end
 end
