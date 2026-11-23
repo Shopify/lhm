@@ -32,6 +32,8 @@ module Lhm
 
     # Quotes one MySQL identifier, such as a table or trigger name that
     # `show tables` or `show triggers` returned. A dot stays part of the name.
+    # Avoid split by dot `with connection.quote_table_name`, as it could
+    # affect tables in different databases.
     def quote_identifier(name)
       "`#{ name.to_s.gsub('`', '``') }`"
     end
