@@ -117,6 +117,23 @@ module Lhm
       end
   end
 
+  # Inline mode (ALTER TABLE directly, no shadow table) defaults to "on" in
+  # development and test. Override from config/environments/*.rb or
+  # config/initializers/*.rb.
+  def self.disallow_inline!
+    @@inline_allowed = false
+  end
+
+  def self.allow_inline!
+    @@inline_allowed = true
+  end
+
+  def self.inline_allowed?
+    return @@inline_allowed if defined?(@@inline_allowed)
+
+    !!(defined?(Rails.env) && (Rails.env.test? || Rails.env.development?))
+  end
+
   private
 
   def drop_tables_and_triggers(run = false, triggers, tables)
