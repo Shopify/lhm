@@ -109,6 +109,25 @@ end
 to prevent accidental data loss. After successful or failed LHM migrations, these leftover
 tables must be cleaned up.
 
+### Inline mode
+In development and test, LHM runs migrations 'inline' by default. It runs `ALTER TABLE` directly
+on the original table, without the shadow table and triggers.
+
+Inline mode is fast, but it can hide two problems that only show up in production:
+- Plain migration calls like `add_column` inside an LHM migration work locally, but they never
+  reach staging environments built from the schema file.
+- Migrations that hit LHM's limitations, such as foreign keys or virtual columns, pass inline and
+  fail when LHM runs for real.
+
+To run the real LHM path, turn inline mode off in an environment file or an initializer:
+
+```ruby
+# config/environments/development.rb
+Lhm.disallow_inline!
+```
+
+You can also turn it on in other environments, such as a CI environment, with `Lhm.allow_inline!`.
+
 ### Usage with ProxySQL
 LHM can recover from connection loss. However, when used in conjunction with ProxySQL, there are multiple ways that
 connection loss could induce data loss (if triggered by a failover). Therefore  it will perform additional checks to
