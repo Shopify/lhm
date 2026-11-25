@@ -1,5 +1,6 @@
 # Unreleased
 * Quote table and trigger names that `Lhm.cleanup` and `Lhm.cleanup_current_run` read from the database before they use them in DDL
+* Add `Lhm.disallow_inline!` and `Lhm.allow_inline!` to control inline mode, which defaults to on in development and test
 
 # 4.5.2 (Nov, 2026)
 * Update test matrix to include Rails 8.1 and Ruby 3.4, 4.0
